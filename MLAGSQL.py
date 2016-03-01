@@ -49,7 +49,7 @@ def CreateTables():
         c.execute("drop table MLAGPeer")
         logging.debug("The table MLAGPeer exists and is deleted")
     c.execute(
-    "CREATE TABLE MLAGPeer (SwitchID integer,MLAGID integer,MLAGPeerName text,VRName text,LocalIPAddress text,ISCVlanName text,ISCIP text,ISCVlanTag int,ChkPtStatus int,AuthMethod text,NumMLAGPorts int,PRIMARY KEY(SwitchID,MLAGID))")
+    "CREATE TABLE MLAGPeer (SwitchID integer,ISCID integer,ISCPort integer,MLAGPeerName text,VRName text,PeerIPAddress text,ISCVlanName text,ISCIP text,ISCVlanTag int,ChkPtStatus int,AuthMethod text,NumMLAGPorts int,PRIMARY KEY(SwitchID,ISCID))")
 
     #Check if stale table PortInfo exists before Creating the new one
     result = c.execute("PRAGMA table_info(PortInfo)")
@@ -58,13 +58,13 @@ def CreateTables():
         c.execute("drop table PortInfo")
         logging.debug("The table PortInfo exists and is deleted")
 
-    c.execute("CREATE TABLE PortInfo (SwitchID integer,PortID integer,MLAGID integer,AdminState integer,LinkState integer, \
+    c.execute("CREATE TABLE PortInfo (SwitchID integer,ISCID integer,PortID integer,MLAGID integer, \
     VlanName Text,VlanTag integer,Tagged integer, \
     PRIMARY KEY(SwitchID,VlanTag),FOREIGN KEY (MLAGID) REFERENCES MLAGPeer(MLAGID), FOREIGN KEY(SwitchID) REFERENCES SwitchID(SwitchID))")
 
-    c.execute("CREATE INDEX SearchPort on PortInfo (SwitchID,PortID,MLAGID)")
+    c.execute("CREATE INDEX SearchPort on PortInfo (SwitchID,ISCID,PortID,MLAGID)")
 
-def AddMLAGPeerInstance(SwitchID,MLAGID,MLAGPeerName,VRName,LocalIPAddress,ISCVlanName,ISCIP,ISCVlanTag,ChkPtStatus,AuthMethod,NumMLAGPorts):
+def AddMLAGPeerInstance(SwitchID,ISCID,ISCPort,MLAGPeerName,VRName,LocalIPAddress,ISCVlanName,ISCIP,ISCVlanTag,ChkPtStatus,AuthMethod,NumMLAGPorts):
     """
     Adds Entry into the MLAGPeer table
     TBD : Add validations to each argument passed
@@ -77,22 +77,22 @@ def AddMLAGPeerInstance(SwitchID,MLAGID,MLAGPeerName,VRName,LocalIPAddress,ISCVl
     #Validations - To be added
 
     #Check if the entry exists
-    result=c.execute("SELECT * from MLAGPeer where MLAGId= "+str(MLAGID)+" and SwitchID= "+str(SwitchID)+" ;")
+    result=c.execute("SELECT * from MLAGPeer where ISCID= "+str(ISCID)+" and SwitchID= "+str(SwitchID)+" ;")
     Complete = result.fetchall()
     if len(Complete) != 0:
         logging.info("The table is empty")
     else:
         logging.info("The value is %s",Complete)
 
-    result=c.execute("INSERT INTO MLAGPeer VALUES ("+str(SwitchID)+ ","+ str(MLAGID)+",'"+MLAGPeerName+"','"+ \
+    result=c.execute("INSERT INTO MLAGPeer VALUES ("+str(SwitchID)+ ","+ str(ISCID)+","+str(ISCPort)+",'"+MLAGPeerName+"','"+ \
                     VRName+"','"+LocalIPAddress+"','" +ISCVlanName +"','"+ ISCIP +"',"+ \
                      str(ISCVlanTag) +",'"+ChkPtStatus+"','"+AuthMethod+"',"+str(NumMLAGPorts)+");")
     Complete = result.fetchall()
     logging.debug("The SQL INSERT command result is %s",Complete)
 
 
-
-def AddPortInfo(SwitchID,PortID,MLAGID,AdminState,LinkState,VlanName,VlanTag,Tagged):
+#  (SwitchID integer,ISCID integer,PortID integer,MLAGID integer,  VlanName Text,VlanTag integer,Tagged integer, PRIMARY KEY(SwitchID,VlanTag)
+def AddPortInfo(SwitchID,ISCID,PortID,MLAGID,VlanName,VlanTag,Tagged):
     """
     Adds Entry into the portInfo table
     TBD : Add validations into each argument
@@ -117,8 +117,8 @@ def AddPortInfo(SwitchID,PortID,MLAGID,AdminState,LinkState,VlanName,VlanTag,Tag
     else:
         logging.debug("The value is %s",Complete)
 
-    result=c.execute("INSERT INTO PortInfo VALUES ("+str(SwitchID) + "," + str(PortID)+","+str(MLAGID) + " ,'" + AdminState+"','"+ \
-                    LinkState +"','"+VlanName+"'," + str(VlanTag) +","+ str(Tagged)+");")
+    result=c.execute("INSERT INTO PortInfo VALUES ("+str(SwitchID) + ","+str(ISCID)+"," + str(PortID)+","+str(MLAGID) + " ,'"  \
+                    +VlanName+ "'," + str(VlanTag) + "," + str(Tagged) +");")
     Complete = result.fetchall()
     logging.debug("The SQL INSERT command result is %s",Complete)
 
