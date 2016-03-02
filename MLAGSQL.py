@@ -60,7 +60,7 @@ def CreateTables():
 
     c.execute("CREATE TABLE PortInfo (SwitchID integer,ISCID integer,PortID integer,MLAGID integer, \
     VlanName Text,VlanTag integer,Tagged integer, \
-    PRIMARY KEY(SwitchID,VlanTag),FOREIGN KEY (MLAGID) REFERENCES MLAGPeer(MLAGID), FOREIGN KEY(SwitchID) REFERENCES SwitchID(SwitchID))")
+    PRIMARY KEY(SwitchID,VlanTag),FOREIGN KEY (ISCID) REFERENCES MLAGPeer(ISCID), FOREIGN KEY(SwitchID) REFERENCES MLAGPeer(SwitchID))")
 
     c.execute("CREATE INDEX SearchPort on PortInfo (SwitchID,ISCID,PortID,MLAGID)")
 
