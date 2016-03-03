@@ -1,11 +1,11 @@
 import socket
 #SendCmd procedure takes a cli command as input and execute
 #it in the switch CLI and returns the output as string
-def SendCmd (command):
-        global sHandler
-        global IPAddress
-        global username
-        global password
+def SendCmd (sHandler,command):
+        """
+        SendCmd procedure takes a cli command as input and execute
+        it in the switch CLI and returns the output as string
+        """
         returnstring = ""
         try:
             if sHandler != 0:
