@@ -1,6 +1,4 @@
 import socket
-#SendCmd procedure takes a cli command as input and execute
-#it in the switch CLI and returns the output as string
 def SendCmd (sHandler,command):
         """
         SendCmd procedure takes a cli command as input and execute
