@@ -8,8 +8,8 @@ def SendCmd (sHandler,command):
         try:
             if sHandler != 0:
                 sHandler.write (command +"\n")
-                returnstring = sHandler.read_until("#")
+                returnstring = sHandler.read_until("#",timeout=10)
                 return returnstring
-        except socket.error:
+        except:
             return returnstring
 
