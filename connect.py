@@ -7,14 +7,6 @@ import getpass
 import time
 import re
 
-global sHandler
-global timeout
-global IPAddress 
-global username
-global password
-
-sHandler = 0
-timeout = 5
 
 
 
@@ -24,23 +16,15 @@ timeout = 5
 
 
 
-def Connect ():
+def Connect (host,username,password):
 
-	global sHandler
+	#global sHandler
 
-	IPAddress = raw_input ("\nPlease Enter your Management IP Address: ")
-	try:
-		socket.inet_aton(IPAddress)
-	except socket.error:
-		print "\n!!! Error: Please Enter Valid IP Address !!!\n"
-		sys.exit()
 
-	username = raw_input("Enter your Username: ")
-	password = raw_input("Enter your Password: ")
-
+	sHandler = 0
 	try:
 		if sHandler == 0:
-			sHandler = telnetlib.Telnet (IPAddress) 
+			sHandler = telnetlib.Telnet (host)
 
 			print "\nConnecting in 3 Seconds"
 			for i in range(3):
@@ -63,6 +47,7 @@ def Connect ():
 			#prompt=re.compile(r'.\d+\s[#>]\s$')
 			#sHandler.expect ([prompt])
 			#SendCmd ("disable clip")
+			return sHandler
 			
 	except socket.timeout:
 		print "\nNo Connection to your Host: "+host+"\n" 
