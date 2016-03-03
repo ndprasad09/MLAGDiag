@@ -8,7 +8,7 @@ def SendCmd (sHandler,command):
         try:
             if sHandler != 0:
                 sHandler.write (command +"\n")
-                returnstring = sHandler.read_until("#",timeout=10)
+                returnstring = sHandler.read_until("#",timeout=5)
                 return returnstring
         except:
             return returnstring
