@@ -14,6 +14,6 @@ except socket.error:
 
 username = raw_input("Enter your Username: ")
 password = raw_input("Enter your Password: ")
-retHandler = connect.Connect(IPAddress,username,password)
+retHandler = Connect(IPAddress,username,password)
 #from connect import sHandler
 print retHandler
