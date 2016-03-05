@@ -64,9 +64,16 @@ def get_mlag_peer(handler,SwitchID):
     ISCVlanpresent = re.search (r"VLAN\s+:\s+(\w+)\s+.*",output)
     if ISCVlanpresent:
         ISCVlan = ISCVlanpresent.groups(1)[0]
-        IPAddress=re.search (r"Local\s+IP\s+Address\s+:\s+(\d+\.\d+\.\d+\.\d+)\s+Peer\s+IP\s+Address\s+:\s+(\d+\.\d+\.\d+\.\d+)",output)
-        LocalIPAddress = IPAddress.groups(1)[0]
-        PeerIPAddress = IPAddress.groups(1)[1]
+        LIPAddressexist=re.search (r"Local\s+IP\s+Address\s+:\s+(\d+\.\d+\.\d+\.\d+)\s+",output)
+        if LIPAddressexist:
+            LocalIPAddress = LIPAddressexist.groups(1)[0]
+        else :
+            logging.info("IPadrress not confgured for ISC vlan :"+ISCVlan)
+        PIpAddressexist=re.search(r"Peer\s+IP\s+Address\s+:\s+(\d+\.\d+\.\d+\.\d+)",output)
+        if PIpAddressexist:
+            PeerIPAddress = PIpAddressexist.groups(1)[0]
+        else:
+            logging.info("Peer IP addrees not configured for peer:"+PeerName)
         #-- Get show isc vlan output from switch
         output2 = Library.SendCmd(handler,"show vlan "+ISCVlan)
         #-- ISC vlan specific information
