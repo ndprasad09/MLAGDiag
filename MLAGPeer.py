@@ -20,6 +20,9 @@ def get_mlag_peer(handler,SwitchID):
     Authentication = ""
     PeerName = ""
     ISCPort = 0
+    PeerIPAddress = ""
+    LocalIPAddress= ""
+    ISCVlanID = 0
 
     #-- Disable cli paging in swictch
     Library.SendCmd(handler,"disable clipaging")
@@ -31,6 +34,11 @@ def get_mlag_peer(handler,SwitchID):
     PeerNameexist = re.search(r"MLAG\s+Peer\s+:\s+(\w+)\s+.*",output)
     if PeerNameexist:
         PeerName = PeerNameexist.groups(1)[0]
+    else :
+        logging.error("No MLAG Peer Exists in Switch ID : "+str(SwitchID))
+        logging.error("Returning with failure to update the MLAG Peer Instance")
+        return
+
     #-- Virtual router
     VirtualRouterexist = re.search (r"Virtual\s+Router\s+:\s+(.*)\s+\r",output)
     if VirtualRouterexist:
@@ -43,6 +51,15 @@ def get_mlag_peer(handler,SwitchID):
     Authenticationexist = re.search(r"Authentication\s+:\s+(\w+)\s+.*",output)
     if Authenticationexist:
         Authentication = Authenticationexist.groups(1)[0]
+
+    #-- MLAG Ports
+    match=re.search (r"MLAG.*ports\s+:\s+([1-9]+)\s+.*",output)
+    if match:
+        MLAGPorts = int(match.groups(1)[0])
+    else:
+        MLAGPorts = 0
+        logging.error("No MLAG ports present")
+
     #-- ISC vlan
     ISCVlanpresent = re.search (r"VLAN\s+:\s+(\w+)\s+.*",output)
     if ISCVlanpresent:
@@ -50,51 +67,42 @@ def get_mlag_peer(handler,SwitchID):
         IPAddress=re.search (r"Local\s+IP\s+Address\s+:\s+(\d+\.\d+\.\d+\.\d+)\s+Peer\s+IP\s+Address\s+:\s+(\d+\.\d+\.\d+\.\d+)",output)
         LocalIPAddress = IPAddress.groups(1)[0]
         PeerIPAddress = IPAddress.groups(1)[1]
-    else:
-        print "No ISCVlan present"
-
-    #-- MLAG Ports
-    match=re.search (r"MLAG.*ports\s+:\s+(\d+)\s+.*",output)
-    if match:
-        MLAGPorts = int(match.groups(1)[0])
-    else:
-        print "No Match for MLAG ports"
-
-    #-- Get show isc vlan output from switch
-    output2 = Library.SendCmd(handler,"show vlan "+ISCVlan)
-    #-- ISC vlan specific information
-    #-- Tag status
-    TagInfo = re.search (r"Tagging:(.*)",output2)
-    if TagInfo:
-        Vlantag = TagInfo.groups(1)[0]
-        Tagged = re.search (r"802\.1Q.*Tag\s+(\d+)",output2)
-
-        if Tagged:
-            ISCVlanID = Tagged.groups(1)[0]
-            Ports = re.search(r"Ports.*Number.*active.*ports.*\n.*Tag:\s+(\w+).*\r",output2)
-            if Ports:
-                print Ports.groups(1)
-                ISCPort = Ports.groups(1)[0]
+        #-- Get show isc vlan output from switch
+        output2 = Library.SendCmd(handler,"show vlan "+ISCVlan)
+        #-- ISC vlan specific information
+        #-- Tag status
+        TagInfo = re.search (r"Tagging:(.*)",output2)
+        if TagInfo:
+            Vlantag = TagInfo.groups(1)[0]
+            Tagged = re.search (r"802\.1Q.*Tag\s+(\d+)",output2)
+            if Tagged:
+                ISCVlanID = Tagged.groups(1)[0]
+                Ports = re.search(r"Ports.*Number.*active.*ports.*\n.*Tag:\s+(\w+).*\r",output2)
+                if Ports:
+                    ISCPort = Ports.groups(1)[0]
+                else:
+                    UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+(\w+).*\r",output2)
+                    if UntagPorts:
+                        ISCPort = UntagPorts.groups(1)[0]
+                    else:
+                        logging.error("No Ports found in ISC Vlan: "+ISCVlan)
             else:
+                #-- Untagged ISC Vlan is given a tag of 12345
+                ISCVlanID = 12345
                 UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+(\w+).*\r",output2)
                 if UntagPorts:
                     ISCPort = UntagPorts.groups(1)[0]
                 else:
-                    print "No Ports found !!!"
+                    logging.error("No Ports found in ISC Vlan : "+ISCVlan)
         else:
-            #-- Untagged ISC Vlan is given a tag of 12345
-            ISCVlanID = 12345
-            UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+(\w+).*\r",output2)
-            if UntagPorts:
-                ISCPort = UntagPorts.groups(1)[0]
-            else:
-                print "No Ports found !!!"
+            logging.info("No Tag Info Present for ISCVlan: " + ISCVlan)
+         #-- remove invalid characters from the port
+        if ISCPort:
+            ISCPort = ISCPort.strip('g')
     else:
-        print "No Tag Info Present"
+        logging.error("No ISCVlan present !!!")
 
-    #-- remove invalid characters from the port
-    if ISCPort:
-        ISCPort = ISCPort.strip('g')
+
 
     #-- Add to Database
-    MLAGSQL.AddMLAGPeerInstance(1,1,ISCPort,PeerName,VirtualRouter,LocalIPAddress,ISCVlan,PeerIPAddress,ISCVlanID,CheckpointStatus,Authentication,1)
+    MLAGSQL.AddMLAGPeerInstance(1,1,ISCPort,PeerName,VirtualRouter,PeerIPAddress,ISCVlan,LocalIPAddress,ISCVlanID,CheckpointStatus,Authentication,MLAGPorts)
