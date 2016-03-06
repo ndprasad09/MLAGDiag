@@ -1,4 +1,5 @@
 import socket
+import re
 def SendCmd (sHandler,command):
         """
         SendCmd procedure takes a cli command as input and execute
@@ -13,3 +14,16 @@ def SendCmd (sHandler,command):
         except:
             return returnstring
 
+def split_before(pattern,text):
+    """
+    this proc will split the text before the
+    occurance of the specified pattern
+    :param pattern:
+    :param text:
+    :return: list of substrings
+    """
+    prev = 0
+    for m in re.finditer(pattern,text):
+        yield text[prev:m.start()]
+        prev = m.start()
+    yield text[prev:]
