@@ -47,11 +47,8 @@ MLAGSQL.AddPortInfo(1,1,'2:21',0,'v3',3,0)
 MLAGSQL.AddPortInfo(1,1,'3:11',7,'v4',4,1)
 MLAGSQL.AddPortInfo(1,1,'52',8,'v5',5,1)
 MLAGSQL.AddPortInfo(1,1,'52',9,'v6',6,1)
+MLAGSQL.AddPortInfo(2,2,'1',2,'v2',2,0)
 MLAGSQL.AddPortInfo(1,1,'52',100,'v100',4095,0)
-
-
-Switch1="1"
-test.VlanCheck(Switch1)
 
 
 #Debug functions to see  table content
@@ -77,7 +74,7 @@ MLAGSQL.DebugShowPortTable()
 # Get specific parameters from the MLAG table needed like ISC VLan name / Tag , ISC IP ,Auth Method etc.
 
 #Delete all the tables
-MLAGSQL.DeleteTables()
+#MLAGSQL.DeleteTables()
 
 #Disconnect the database
-MLAGSQL.CloseDatabase()
+#MLAGSQL.CloseDatabase()
