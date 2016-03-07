@@ -21,7 +21,7 @@ def MlagPort(handle, SwitchID):
     mlag_id = []
     lines = mlag_port.splitlines()
     for x in lines:
-        mlag_info = re.search('^([0-9]+)\s*([0-9]+)\s', x)
+        mlag_info = re.search('^([0-9]+)\s+([0-9]+(:[0-9]+|(?!:)))\s*', x)
         if mlag_info:
             if mlag_info.group(1):
                 mlag_id.append(mlag_info.group(1))
