@@ -3,6 +3,10 @@ import logging
 import connect
 import Library
 import re
+#-- Global variables
+global ISCId
+ISCId = 0
+
 def get_mlag_peer(handler,SwitchID):
     """
     This procedure collects MLAG Peer Information
@@ -13,6 +17,10 @@ def get_mlag_peer(handler,SwitchID):
     :return: none
 
     """
+    #-- Global variables
+
+    global ISCId
+
     #-- Initialize the local variables
     ISCVlan = ""
     VirtualRouter = ""
@@ -23,7 +31,6 @@ def get_mlag_peer(handler,SwitchID):
     PeerIPAddress = ""
     LocalIPAddress= ""
     ISCVlanID = 0
-    ISCId = 0
     index = 0
     #-- Disable cli paging in switch
     Library.SendCmd(handler,"disable clipaging")
@@ -113,7 +120,9 @@ def get_mlag_peer(handler,SwitchID):
                             logging.error("No Ports found in ISC Vlan: "+ISCVlan)
                 else:
                     #-- Untagged ISC Vlan is given a tag of 12345
-                    ISCVlanID = 12345
+                    ISCVlanID =re.search(r"Tagging.*Untagged.*Internal.*tag\s+(\d+).*",output2)
+                    if ISCVlanID:
+                        ISCVlanID =ISCVlanID.groups(1)[0]
                     UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+(\w+).*\r",output2)
                     if UntagPorts:
                         ISCPort = UntagPorts.groups(1)[0]
