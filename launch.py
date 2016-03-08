@@ -1,6 +1,7 @@
 import MLAGSQL
 import logging
-
+import connect
+import MLAGPeer
 # The default level is WARNING(30). The available levels are INFO(20),DEBUG(10),ERROR(40) and CRITICAL(50)
 # Use the approppriate log levels for debug print outputs
 logging.basicConfig(level=logging.INFO)
@@ -21,28 +22,26 @@ MLAGSQL.CreateTables()
 # ISCVlanName text,ISCIP text,ISCVlanTag int,ChkPtStatus int,
 # AuthMethod text,NumMLAGPorts int,PRIMARY KEY(SwitchID,ISCID))")
 
-MLAGSQL.AddMLAGPeerInstance(1,1,11,'sw2','VR-Default','51.2.2.1','two','51.2.2.2',2,'Up','None',1)
-MLAGSQL.AddMLAGPeerInstance(1,2,12,'sw3','VR-Default','41.2.2.2','three','41.2.2.1',3,'Up','None',1)
+# Connect to the switches
 
-MLAGSQL.AddMLAGPeerInstance(2,1,21,'sw1','VR-Default','51.2.2.2','two','51.2.2.1',2,'Up','None',1)
-MLAGSQL.AddMLAGPeerInstance(2,2,22,'sw3','VR-Default','31.2.2.2','three','31.2.2.1',4,'Up','None',1)
+connect.ConnecttoSwitches()
+SwitchID_handler=connect.SwitchID_handlerdict
+for key in SwitchID_handler:
+    #-- AddMLAGPeerInstance
+    MLAGPeer.get_mlag_peer(SwitchID_handler[key],key)
+    MLAGSQL.DebugShowMLAGTable()
+    #-- AddPortInstance
+connect.Closeconnectiontoswitches()
+#MLAGSQL.AddMLAGPeerInstance(1,1,11,'sw1','VR-Default',PeerIPAddress,ISCVlan,LocalIPAddress,2,'Up','None',1)
 
-MLAGSQL.AddMLAGPeerInstance(3,1,31,'sw1','VR-Default','41.2.2.1','two','41.2.2.2',2,'Up','None',1)
-MLAGSQL.AddMLAGPeerInstance(3,2,32,'sw2','VR-Default','31.2.2.1','three','31.2.2.2',4,'Up','None',1)
 
 
 # AddPortInstance
 #  (SwitchID integer,ISCID integer,PortID integer,MLAGID integer,  VlanName Text,VlanTag integer,Tagged integer, PRIMARY KEY(SwitchID,VlanTag)
-MLAGSQL.AddPortInfo(1,1,52,7,'v3',3,1)
-MLAGSQL.AddPortInfo(1,1,52,7,'v4',4,1)
-MLAGSQL.AddPortInfo(1,1,52,8,'v5',5,1)
-MLAGSQL.AddPortInfo(1,1,52,9,'v6',6,1)
-MLAGSQL.AddPortInfo(1,1,52,100,'v100',4095,0)
-
 
 
 #Debug functions to see  table content
-MLAGSQL.DebugShowMLAGTable()
+
 MLAGSQL.DebugShowPortTable()
 
 #Loading the Tables

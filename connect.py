@@ -6,21 +6,29 @@ import sys
 import getpass
 import time
 import re
+import Library
+import logging
 
-
-
-
+#######################
+#--- Global variables
+#######################
+global SwitchID_handlerdict
+global switchInfo
+SwitchID_handlerdict = {}
+switchInfo = []
 #########################################
 #- Procedures
 ######################################
 
-
-
 def Connect (host,username,password):
-
-	#global sHandler
-
-
+	"""
+	This function establishes a telnet connection to the host
+	and returns a connectionhandler object
+	:param host: host ip address
+	:param username: host username
+	:param password: pasword
+	:return: connectionhandler to the host
+	"""
 	sHandler = 0
 	try:
 		if sHandler == 0:
@@ -54,6 +62,59 @@ def Connect (host,username,password):
 		sys.exit() 
 
 
-	
+def ConnecttoSwitches():
+    """
+    This function will connect to multiple devices
+	:return: a dctionary with keys as switch IDs and
+			 values as connection handler object
+    """
+    global SwitchID_handlerdict
+    switchIDList = []
+    connHandler = []
+    switchNum = raw_input("Please Enter Number of MLAG Switches to Debug: ")
+    switchNum = int(switchNum)
+    for eachSwitch in range(switchNum):
+        tempSwitch = []
+        eachSwitch = eachSwitch + 1
+        while True:
+            switchIP = raw_input('Please Enter IP Address of switch %d: ' % eachSwitch)
+            try:
+                socket.inet_aton(switchIP)
+                break
+            except socket.error:
+                print "!!!IP address Entered is Invalid!!!"
+                continue
+        tempSwitch.append(eachSwitch)
+        tempSwitch.append(switchIP)
+        switchIDList.append(eachSwitch)
+        switchInfo.append(tempSwitch)
+        while True:
+            username = raw_input('Please Enter UserName of Switch %d: ' % eachSwitch)
+            # password = getpass.getpass (prompt = 'Enter your Password of Switch: ')
+            password = raw_input('Please Enter Password of Switch %d: ' % eachSwitch)
+            print "\n!!!Connecting to the Switch %d. Please Wait!!!" % eachSwitch
 
+            retVal = Connect(switchIP, username, password)
+            Library.SendCmd(retVal,"disable clipaging")
+            if retVal == -1:
+                continue
+            elif retVal == -2:
+                print "!!!Connection Timeout for Switch %d. Exiting the Script!!!" % eachSwitch
+                sys.exit(1)
+            else:
+                connHandler.append(retVal)
+                break
+	SwitchID_handlerdict = dict(zip(switchIDList,connHandler))
 
+def Closeconnectiontoswitches():
+	"""
+	Close all active telnet sessions
+	:return:
+	"""
+	global SwitchID_handlerdict
+	try:
+		for keys in  SwitchID_handlerdict:
+			SwitchID_handlerdict[keys].close()
+			logging.info("Connection closed succesfully")
+	except:
+		logging.error("Could not close the connection !!!")
