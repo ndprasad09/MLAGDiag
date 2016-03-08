@@ -137,4 +137,4 @@ def get_mlag_peer(handler,SwitchID):
             logging.error("No ISCVlan present !!!")
 
         #-- Add to Database
-        MLAGSQL.AddMLAGPeerInstance(SwitchID,ISCId,ISCPort,PeerName,VirtualRouter,PeerIPAddress,ISCVlan,LocalIPAddress,ISCVlanID,CheckpointStatus,Authentication,MLAGPorts)
+        MLAGSQL.AddMLAGPeerInstance(SwitchID,str(ISCId),ISCPort,PeerName,VirtualRouter,PeerIPAddress,ISCVlan,LocalIPAddress,ISCVlanID,CheckpointStatus,Authentication,MLAGPorts)
