@@ -27,7 +27,8 @@ def get_mlag_peer(handler,SwitchID):
     CheckpointStatus = ""
     Authentication = ""
     PeerName = ""
-    ISCPort = 0
+    ISCPort = []
+    ISCvlanport =""
     PeerIPAddress = ""
     LocalIPAddress= ""
     ISCVlanID = 0
@@ -48,9 +49,7 @@ def get_mlag_peer(handler,SwitchID):
         return
 
     #-- split the output MLAG peerwise
-    outputpart = Library.split_before("MLAG\s+Peer\s+:",wholeoutput)
-
-    #-- Parse the output peerwise
+    outputpart = Library.split_before("MLAG\s+Peer\s+:",wholeoutput)  #-- Parse the output peerwise
     for output in list(outputpart):
 
         #-- Peer Name
@@ -109,32 +108,42 @@ def get_mlag_peer(handler,SwitchID):
                 Tagged = re.search (r"802\.1Q.*Tag\s+(\d+)",output2)
                 if Tagged:
                     ISCVlanID = Tagged.groups(1)[0]
-                    Ports = re.search(r"Ports.*Number.*active.*ports.*\n.*Tag:\s+.*(\d?:?\d+).*\r",output2)
+                    Ports = re.search(r"Tag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
                     if Ports:
-                        ISCPort = Ports.groups(1)[0]
-                    else:
-                        UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+.*(\d?:?\d+).*\r",output2)
-                        if UntagPorts:
-                            ISCPort = UntagPorts.groups(1)[0]
-                        else:
-                            logging.error("No Ports found in ISC Vlan: "+ISCVlan)
+                        ISCPort.append(Ports.groups(1)[0])
+                    UntagPorts = re.search (r"Untag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
+                    if UntagPorts:
+                        ISCPort.append(UntagPorts.groups(1)[0])
+
                 else:
-                    #-- Untagged ISC Vlan is given a tag of 12345
                     ISCVlanID =re.search(r"Tagging.*Untagged.*Internal.*tag\s+(\d+).*",output2)
                     if ISCVlanID:
                         ISCVlanID =ISCVlanID.groups(1)[0]
-                    UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+.*(\d?:?\d+).*\r",output2)
+                    UntagPorts = re.search (r"Untag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
                     if UntagPorts:
-                        ISCPort = UntagPorts.groups(1)[0]
-                    else:
-                        logging.error("No Ports found in ISC Vlan : "+ISCVlan)
+                        ISCPort.append(UntagPorts.groups(1)[0])
+
             else:
                 logging.info("No Tag Info Present for ISCVlan: " + ISCVlan)
-            #-- remove invalid characters from the port
-            if ISCPort:
-                ISCPort = ISCPort.strip('g')
+            #-- get the ISC Port
+            ISCPortlength = len(ISCPort)
+            if ISCPortlength:
+                ISCvlanport = ISCPort[0]
+                logging.info(ISCPort)
+                if ISCPortlength > 1:
+                    logging.error("Number of ports present in ISC vlan is "+str(ISCPortlength)+ "!!!!")
+                    logging.info("Go for the trunked port if exists as ISC Port since it is most configured ")
+                    for port in ISCPort:
+                        match = re.search(r".*g",port)
+                        if match:
+                           ISCvlanport = port.strip('g')
+                           break
+            else :
+                logging.error("No Ports found in ISC Vlan : "+ISCVlan)
         else:
             logging.error("No ISCVlan present !!!")
-
+        if ISCvlanport:
+            ISCvlanport = str(ISCvlanport.strip('g'))
         #-- Add to Database
-        MLAGSQL.AddMLAGPeerInstance(SwitchID,ISCId,ISCPort,PeerName,VirtualRouter,PeerIPAddress,ISCVlan,LocalIPAddress,ISCVlanID,CheckpointStatus,Authentication,MLAGPorts)
+        MLAGSQL.AddMLAGPeerInstance(SwitchID,ISCId,ISCvlanport,PeerName,VirtualRouter,PeerIPAddress,ISCVlan,LocalIPAddress,ISCVlanID,CheckpointStatus,Authentication,MLAGPorts)
+
