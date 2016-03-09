@@ -49,7 +49,7 @@ def CreateTables():
         c.execute("drop table MLAGPeer")
         logging.debug("The table MLAGPeer exists and is deleted")
     c.execute(
-    "CREATE TABLE MLAGPeer (SwitchID integer,ISCID integer,ISCPort integer,MLAGPeerName text,VRName text,PeerIPAddress text,ISCVlanName text,ISCIP text,ISCVlanTag int,ChkPtStatus int,AuthMethod text,NumMLAGPorts int,PRIMARY KEY(SwitchID,ISCID))")
+    "CREATE TABLE MLAGPeer (SwitchID integer,ISCID integer,ISCPort Text,MLAGPeerName text,VRName text,PeerIPAddress text,ISCVlanName text,ISCIP text,ISCVlanTag int,ChkPtStatus int,AuthMethod text,NumMLAGPorts int,PRIMARY KEY(SwitchID,ISCID))")
 
     #Check if stale table PortInfo exists before Creating the new one
     result = c.execute("PRAGMA table_info(PortInfo)")
