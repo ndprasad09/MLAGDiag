@@ -179,7 +179,7 @@ def DebugShowPortTable():
     """
     global c
 
-    result=c.execute("SELECT MLAGID from PortInfo WHERE SwitchID=1 AND ISCID=1")
+    result=c.execute("SELECT * from PortInfo")
     ResultsList=result.fetchall()
 
     for row in ResultsList:
