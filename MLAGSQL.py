@@ -49,7 +49,7 @@ def CreateTables():
         c.execute("drop table MLAGPeer")
         logging.debug("The table MLAGPeer exists and is deleted")
     c.execute(
-    "CREATE TABLE MLAGPeer (SwitchID integer,ISCID integer,ISCPort integer,MLAGPeerName text,VRName text,PeerIPAddress text,ISCVlanName text,ISCIP text,ISCVlanTag int,ChkPtStatus int,AuthMethod text,NumMLAGPorts int,PRIMARY KEY(SwitchID,ISCID))")
+    "CREATE TABLE MLAGPeer (SwitchID integer,ISCID integer,ISCPort Text,MLAGPeerName text,VRName text,PeerIPAddress text,ISCVlanName text,ISCIP text,ISCVlanTag int,ChkPtStatus int,AuthMethod text,NumMLAGPorts int,PRIMARY KEY(SwitchID,ISCID))")
 
     #Check if stale table PortInfo exists before Creating the new one
     result = c.execute("PRAGMA table_info(PortInfo)")
@@ -84,7 +84,7 @@ def AddMLAGPeerInstance(SwitchID,ISCID,ISCPort,MLAGPeerName,VRName,LocalIPAddres
     else:
         logging.info("The value is %s",Complete)
 
-    result=c.execute("INSERT INTO MLAGPeer VALUES ("+str(SwitchID)+ ","+ str(ISCID)+","+str(ISCPort)+",'"+MLAGPeerName+"','"+ \
+    result=c.execute("INSERT INTO MLAGPeer VALUES ("+str(SwitchID)+ ","+ str(ISCID)+","+ISCPort+",'"+MLAGPeerName+"','"+ \
                     VRName+"','"+LocalIPAddress+"','" +ISCVlanName +"','"+ ISCIP +"',"+ \
                      str(ISCVlanTag) +",'"+ChkPtStatus+"','"+AuthMethod+"',"+str(NumMLAGPorts)+");")
     Complete = result.fetchall()
