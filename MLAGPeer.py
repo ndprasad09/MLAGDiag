@@ -101,28 +101,34 @@ def get_mlag_peer(handler,SwitchID):
             output2 = Library.SendCmd(handler,"show vlan "+ISCVlan)
 
             #-- ISC vlan specific information
+
             #-- Tag status
             TagInfo = re.search (r"Tagging:(.*)",output2)
             if TagInfo:
                 Vlantag = TagInfo.groups(1)[0]
                 Tagged = re.search (r"802\.1Q.*Tag\s+(\d+)",output2)
+                #-- Tagged vlan ports check
                 if Tagged:
                     ISCVlanID = Tagged.groups(1)[0]
-                    Ports = re.search(r"Tag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
+                    #-- tagged ports
+                    output3=Library.SendCmd(handler,"show vlan "+ISCVlan+" | include Tag:")
+                    Ports = re.findall(r"[\*|!]?(\d?:?\d+g?).*\r",output3)
                     if Ports:
-                        ISCPort.append(Ports.groups(1)[0])
-                    UntagPorts = re.search (r"Untag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
-                    if UntagPorts:
-                        ISCPort.append(UntagPorts.groups(1)[0])
-
+                        print Ports
+                        ISCPort.extend(Ports)
+                    #--Untagged ports
+                    output3=Library.SendCmd(handler,"show vlan "+ISCVlan+" | include Untag:")
+                    Ports = re.findall(r"[\*|!]?(\d?:?\d+g?).*\r",output3)
+                    if Ports:
+                        ISCPort.extend(Ports)
                 else:
                     ISCVlanID =re.search(r"Tagging.*Untagged.*Internal.*tag\s+(\d+).*",output2)
                     if ISCVlanID:
                         ISCVlanID =ISCVlanID.groups(1)[0]
-                    UntagPorts = re.search (r"Untag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
-                    if UntagPorts:
-                        ISCPort.append(UntagPorts.groups(1)[0])
-
+                    output3=Library.SendCmd(handler,"show vlan "+ISCVlan+" | include Untag:")
+                    Ports = re.findall(r"[\*|!]?(\d?:?\d+g?).*\r",output3)
+                    if Ports:
+                        ISCPort.extend(Ports)
             else:
                 logging.info("No Tag Info Present for ISCVlan: " + ISCVlan)
             #-- get the ISC Port
