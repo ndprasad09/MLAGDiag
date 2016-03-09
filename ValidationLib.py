@@ -25,9 +25,8 @@ def CheckMLAGStatus():
 # Get a list of Switch Pair IDs
     result=c.execute("SELECT DISTINCT S1.SwitchID,S2.SwitchID from MLAGPeer S1,MLAGPeer S2 where S1.PeerIPAddress==S2.ISCIP and S2.PeerIPAddress== S1.ISCIP and S1.SwitchID < S2.SwitchID")
     ResultsList=result.fetchall()
-    print ResultsList
     replaceISCID(ResultsList)
-    print "ResultList: ",ResultsList
+
 
 # Checking for Checkpoint Status is all switches
     ChkPtFlag = 0
