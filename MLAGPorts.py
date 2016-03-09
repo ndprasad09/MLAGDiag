@@ -54,7 +54,7 @@ def MlagPort(handle, SwitchID):
     for peer in mlag_peer:
         ISC = MLAGSQL.c.execute("SELECT ISCPort,ISCID from MLAGPeer where SwitchID = '%s' and MLAGPeerName = '%s'" % (SwitchID, peer))
         ISCDetail = ISC_id.fetchall()
-        ISC_Port_Vlan_output = Library.SendCmd(handle, "show ports %s information detail" % (ISCDetail[0][0]))
+        ISC_Port_Vlan_output = Library.SendCmd(handle, "show ports %s information detail" % str(ISCDetail[0][0]))
         ISC_Port_Vlan_info = re.findall('Name:.(.+?),.*Tag =.(.+?),.*\n\s+(Port.*:.*[0-9]*|(?!Port))', ISC_Port_Vlan_output)
         if ISC_Port_Vlan_info:
             for index in ISC_Port_Vlan_info:
