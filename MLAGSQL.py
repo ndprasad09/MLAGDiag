@@ -110,14 +110,14 @@ def AddPortInfo(SwitchID,ISCID,PortID,MLAGID,VlanName,VlanTag,Tagged):
     #Validations - To be added
 
     #Check if the entry exists
-    result=c.execute("SELECT * from PortInfo where PortId='"+PortID+"' and MLAGID = " + str(MLAGID) + " and VlanTag = " + str(VlanTag) + " and SwitchID= " + str(SwitchID)+ " ;")
+    result=c.execute("SELECT * from PortInfo where PortId='"+ str (PortID) +"' and MLAGID = " + str(MLAGID) + " and VlanTag = " + str(VlanTag) + " and SwitchID= " + str(SwitchID)+ " ;")
     Complete = result.fetchall()
     if len(Complete) != 0:
         logging.info("The table is empty")
     else:
         logging.debug("The value is %s",Complete)
 
-    result=c.execute("INSERT INTO PortInfo VALUES ("+str(SwitchID) + ","+str(ISCID)+",'" + PortID+"',"+str(MLAGID) + " ,'"  \
+    result=c.execute("INSERT INTO PortInfo VALUES ("+str(SwitchID) + ","+str(ISCID)+",'" + str (PortID) +"',"+str(MLAGID) + " ,'"  \
                     +VlanName+ "'," + str(VlanTag) + "," + str(Tagged) +");")
     Complete = result.fetchall()
     logging.debug("The SQL INSERT command result is %s",Complete)
@@ -179,8 +179,17 @@ def DebugShowPortTable():
     """
     global c
 
-    result=c.execute("SELECT * from PortInfo")
+    result=c.execute("SELECT MLAGID from PortInfo WHERE SwitchID=1 AND ISCID=1")
     ResultsList=result.fetchall()
 
     for row in ResultsList:
         logging.info(row)
+
+def returnQuery(query):
+    global c
+    result=c.execute(query)
+    ResultsList=result.fetchall()
+    """for row in ResultsList:
+        logging.info(row)
+    """
+    return ResultsList
