@@ -39,7 +39,7 @@ def get_mlag_peer(handler,SwitchID):
 
     #-- Parse the output for required fields to feed to MLAGPeer table
     #-- Peer Name list
-    PeerNameexistlist = re.findall(r"MLAG\s+Peer\s+:\s+(\w+)\s+.*",wholeoutput)
+    PeerNameexistlist = re.findall(r"MLAG\s+Peer\s+:\s+(.*\S+)\s+.*",wholeoutput)
     if PeerNameexistlist:
         logging.info("MLAG Peers are present")
     else:
@@ -54,13 +54,13 @@ def get_mlag_peer(handler,SwitchID):
     for output in list(outputpart):
 
         #-- Peer Name
-        PeerName = re.search(r"MLAG\s+Peer\s+:\s+(\w+)\s+.*",output)
+        PeerName = re.search(r"MLAG\s+Peer\s+:\s+(.*\S+)\s+.*",output)
         if PeerName == None:
             continue
         PeerName=PeerName.groups(1)[index]
 
         #-- Virtual router
-        VirtualRouterexist = re.search (r"Virtual\s+Router\s+:\s+(.*)\s+\r",output)
+        VirtualRouterexist = re.search (r"Virtual\s+Router\s+:\s+(.*\S+)\s+\r",output)
         if VirtualRouterexist:
             VirtualRouter = VirtualRouterexist.groups(1)[index]
 
@@ -70,7 +70,7 @@ def get_mlag_peer(handler,SwitchID):
             CheckpointStatus=CheckpointStatusexist.groups(1)[index]
 
         #-- Authentication
-        Authenticationexist = re.search(r"Authentication\s+:\s+(\w+)\s+.*",output)
+        Authenticationexist = re.search(r"Authentication\s+:\s+(.*\S+)\s+.*",output)
         if Authenticationexist:
             Authentication = Authenticationexist.groups(1)[index]
 
@@ -83,7 +83,7 @@ def get_mlag_peer(handler,SwitchID):
             logging.error("No MLAG ports present")
 
         #-- ISC vlan
-        ISCVlanpresent = re.search (r"VLAN\s+:\s+(\w+)\s+.*",output)
+        ISCVlanpresent = re.search (r"VLAN\s+:\s+(.*\S+)\s+Virtual.*Router.*",output)
         if ISCVlanpresent:
             ISCId = ISCId + 1
             ISCVlan = ISCVlanpresent.groups(1)[0]
@@ -109,11 +109,11 @@ def get_mlag_peer(handler,SwitchID):
                 Tagged = re.search (r"802\.1Q.*Tag\s+(\d+)",output2)
                 if Tagged:
                     ISCVlanID = Tagged.groups(1)[0]
-                    Ports = re.search(r"Ports.*Number.*active.*ports.*\n.*Tag:\s+(\w+).*\r",output2)
+                    Ports = re.search(r"Ports.*Number.*active.*ports.*\n.*Tag:\s+.*(\d?:?\d+).*\r",output2)
                     if Ports:
                         ISCPort = Ports.groups(1)[0]
                     else:
-                        UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+(\w+).*\r",output2)
+                        UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+.*(\d?:?\d+).*\r",output2)
                         if UntagPorts:
                             ISCPort = UntagPorts.groups(1)[0]
                         else:
@@ -123,7 +123,7 @@ def get_mlag_peer(handler,SwitchID):
                     ISCVlanID =re.search(r"Tagging.*Untagged.*Internal.*tag\s+(\d+).*",output2)
                     if ISCVlanID:
                         ISCVlanID =ISCVlanID.groups(1)[0]
-                    UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+(\w+).*\r",output2)
+                    UntagPorts = re.search (r"Ports.*Number.*active.*ports.*\n.*Untag:\s+.*(\d?:?\d+).*\r",output2)
                     if UntagPorts:
                         ISCPort = UntagPorts.groups(1)[0]
                     else:
