@@ -84,7 +84,7 @@ def AddMLAGPeerInstance(SwitchID,ISCID,ISCPort,MLAGPeerName,VRName,LocalIPAddres
     else:
         logging.info("The value is %s",Complete)
 
-    result=c.execute("INSERT INTO MLAGPeer VALUES ("+str(SwitchID)+ ","+ str(ISCID)+","+str(ISCPort)+",'"+MLAGPeerName+"','"+ \
+    result=c.execute("INSERT INTO MLAGPeer VALUES ("+str(SwitchID)+ ","+ str(ISCID)+","+ISCPort+",'"+MLAGPeerName+"','"+ \
                     VRName+"','"+LocalIPAddress+"','" +ISCVlanName +"','"+ ISCIP +"',"+ \
                      str(ISCVlanTag) +",'"+ChkPtStatus+"','"+AuthMethod+"',"+str(NumMLAGPorts)+");")
     Complete = result.fetchall()
