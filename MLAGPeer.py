@@ -11,7 +11,6 @@ def get_mlag_peer(handler,SwitchID):
     """
     This procedure collects MLAG Peer Information
     and inserts in to the table MLAGPeerInstance
-
     :param handler: connection handler to the switch
     :param SwitchID: Switch ID
     :return: none
