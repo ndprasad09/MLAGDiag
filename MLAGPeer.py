@@ -18,21 +18,7 @@ def get_mlag_peer(handler,SwitchID):
 
     """
     #-- Global variables
-
     global ISCId
-
-    #-- Initialize the local variables
-    ISCVlan = ""
-    VirtualRouter = ""
-    CheckpointStatus = ""
-    Authentication = ""
-    PeerName = ""
-    ISCPort = []
-    ISCvlanport =""
-    PeerIPAddress = ""
-    LocalIPAddress= ""
-    ISCVlanID = 0
-    index = 0
     #-- Disable cli paging in switch
     Library.SendCmd(handler,"disable clipaging")
     #-- Get the show mlag peer output
@@ -49,34 +35,45 @@ def get_mlag_peer(handler,SwitchID):
         return
 
     #-- split the output MLAG peerwise
-    outputpart = Library.split_before("MLAG\s+Peer\s+:",wholeoutput)  #-- Parse the output peerwise
+    outputpart = Library.split_before("MLAG\s+Peer\s+:",wholeoutput)
+    #-- Parse the output peerwise
     for output in list(outputpart):
+        #-- Initialize the local variables
+        VirtualRouter = ""
+        CheckpointStatus = ""
+        Authentication = ""
+        PeerName = ""
+        ISCPort = []
+        ISCvlanport =""
+        PeerIPAddress = ""
+        LocalIPAddress= ""
+        ISCVlanID = 0
 
         #-- Peer Name
         PeerName = re.search(r"MLAG\s+Peer\s+:\s+(.*\S+)\s+.*",output)
         if PeerName == None:
             continue
-        PeerName=PeerName.groups(1)[index]
+        PeerName=PeerName.groups(1)[0]
 
         #-- Virtual router
         VirtualRouterexist = re.search (r"Virtual\s+Router\s+:\s+(.*\S+)\s+\r",output)
         if VirtualRouterexist:
-            VirtualRouter = VirtualRouterexist.groups(1)[index]
+            VirtualRouter = VirtualRouterexist.groups(1)[0]
 
         #-- Checkpointstatus
         CheckpointStatusexist = re.search (r"Checkpoint\s+Status\s+:\s+(Up|Down)\s+.*",output)
         if CheckpointStatusexist:
-            CheckpointStatus=CheckpointStatusexist.groups(1)[index]
+            CheckpointStatus=CheckpointStatusexist.groups(1)[0]
 
         #-- Authentication
         Authenticationexist = re.search(r"Authentication\s+:\s+(.*\S+)\s+.*",output)
         if Authenticationexist:
-            Authentication = Authenticationexist.groups(1)[index]
+            Authentication = Authenticationexist.groups(1)[0]
 
         #-- MLAG Ports
         match=re.search (r"MLAG.*ports\s+:\s+([1-9]+)\s+.*",output)
         if match:
-            MLAGPorts = int(match.groups(1)[index])
+            MLAGPorts = int(match.groups(1)[0])
         else:
             MLAGPorts = 0
             logging.error("No MLAG ports present")
@@ -101,37 +98,48 @@ def get_mlag_peer(handler,SwitchID):
             output2 = Library.SendCmd(handler,"show vlan "+ISCVlan)
 
             #-- ISC vlan specific information
+
             #-- Tag status
             TagInfo = re.search (r"Tagging:(.*)",output2)
             if TagInfo:
                 Vlantag = TagInfo.groups(1)[0]
                 Tagged = re.search (r"802\.1Q.*Tag\s+(\d+)",output2)
+                #-- Tagged vlan ports check
                 if Tagged:
                     ISCVlanID = Tagged.groups(1)[0]
-                    Ports = re.search(r"Tag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
-                    if Ports:
-                        ISCPort.append(Ports.groups(1)[0])
-                    UntagPorts = re.search (r"Untag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
-                    if UntagPorts:
-                        ISCPort.append(UntagPorts.groups(1)[0])
-
+                    #-- tagged ports
+                    output3=re.search(r"(Tag:.*\r)",output2)
+                    if output3:
+                        output3=''.join(output3.groups(1)[0])
+                        Ports = re.findall(r"[\*|!]?(\d?:?\d+g?)",output3)
+                        if Ports:
+                            ISCPort.extend(Ports)
+                    #--Untagged ports
+                    output3=re.search(r"(Untag:.*\r)",output2)
+                    if output3:
+                        output3=''.join(output3.groups(1)[0])
+                        Ports = re.findall(r"[\*|!]?(\d?:?\d+g?)",output3)
+                        if Ports:
+                            ISCPort.extend(Ports)
                 else:
                     ISCVlanID =re.search(r"Tagging.*Untagged.*Internal.*tag\s+(\d+).*",output2)
                     if ISCVlanID:
                         ISCVlanID =ISCVlanID.groups(1)[0]
-                    UntagPorts = re.search (r"Untag:\s+[\*|!]?(\d?:?\d+g?).*\r",output2)
-                    if UntagPorts:
-                        ISCPort.append(UntagPorts.groups(1)[0])
-
+                    output3=re.search(r"(Untag:.*\r)",output2)
+                    if output3:
+                        output3=''.join(output3.groups(1)[0])
+                        Ports = re.findall(r"[\*|!]?(\d?:?\d+g?)",output3)
+                        if Ports:
+                            ISCPort.extend(Ports)
             else:
                 logging.info("No Tag Info Present for ISCVlan: " + ISCVlan)
             #-- get the ISC Port
             ISCPortlength = len(ISCPort)
             if ISCPortlength:
                 ISCvlanport = ISCPort[0]
-                logging.info(ISCPort)
+                #--FIX ME
                 if ISCPortlength > 1:
-                    logging.error("Number of ports present in ISC vlan is "+str(ISCPortlength)+ "!!!!")
+                    logging.error("Number of ports present in ISC vlan "+str(ISCVlan)+"="+str(ISCPortlength)+ "!!!!")
                     logging.info("Go for the trunked port if exists as ISC Port since it is most configured ")
                     for port in ISCPort:
                         match = re.search(r".*g",port)
