@@ -54,7 +54,7 @@ def MlagPort(handle, SwitchID):
 
     for peer in mlag_peer:
         ISC_ID = MLAGSQL.c.execute(
-            "SELECT DISTINCT ISCID from MLAGPeer" )
+            "SELECT DISTINCT ISCID from MLAGPeer where SwitchID = '%s'" % (SwitchID))
         ISCid = ISC_ID.fetchall()
         for id in ISCid:
             ISC_Port = MLAGSQL.c.execute(
