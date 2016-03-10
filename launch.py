@@ -2,6 +2,7 @@ import MLAGSQL
 import logging
 import connect
 import MLAGPeer
+import MLAGPorts
 # The default level is WARNING(30). The available levels are INFO(20),DEBUG(10),ERROR(40) and CRITICAL(50)
 # Use the approppriate log levels for debug print outputs
 logging.basicConfig(level=logging.INFO)
@@ -30,6 +31,7 @@ for key in SwitchID_handler:
     #-- AddMLAGPeerInstance
     MLAGPeer.get_mlag_peer(SwitchID_handler[key],key)
     MLAGSQL.DebugShowMLAGTable()
+    MLAGPorts.MlagPort(SwitchID_handler[key],key)
     #-- AddPortInstance
 connect.Closeconnectiontoswitches()
 #MLAGSQL.AddMLAGPeerInstance(1,1,11,'sw1','VR-Default',PeerIPAddress,ISCVlan,LocalIPAddress,2,'Up','None',1)
