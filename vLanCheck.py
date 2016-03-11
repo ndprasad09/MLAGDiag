@@ -57,4 +57,3 @@ def VlanCheck():
                     MLAGPortVLAN.clear()
                 ISCPortVLAN.clear()
 
-VlanCheck()
