@@ -9,18 +9,12 @@ def CompareVlansBetween(ISCPortVLAN, MLAGPortVLAN):
     ISCPortVLAN.sort()
     MLAGPortVLAN.sort()
 
-    if MLAGPortVLAN == ISCPortVLAN:
-        print("\tPASS: ISC Port VLAN & MLAG Port VLAN matched")
+    isc_vlan =set(MLAGPortVLAN).difference(ISCPortVLAN)
+    if isc_vlan:
+    	sys.stdout.write ("\tFAIL: ISC Port is not associated with the MLAG VLAN ")
+        print (isc_vlan)
     else:
-        print("\tFAIL: ISC Port VLAN & MLAG Port VLAN mis-match")
-        mlag_vlan=set(ISCPortVLAN).difference(MLAGPortVLAN)
-        isc_vlan =set(MLAGPortVLAN).difference(ISCPortVLAN)
-        if mlag_vlan:
-            sys.stdout.write ("\tMLAG Port is not associated with the VLAN ")
-            print (mlag_vlan)
-        if isc_vlan:
-            sys.stdout.write ("\tISC Port is not associated with the VLAN ")
-            print (isc_vlan)
+	print ("\tPASS: ISC Port is associated in all MLAG VLAN(s)")
     print ("\n")
 
 def VlanCheck():
