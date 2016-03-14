@@ -1,5 +1,5 @@
 == mLAG Diag Tool ==
-Requires Pythont: 2.7
+Requires Python: 2.7
 License: Free Diag Tool for EXOS Mlag configuration
 
 == Description ==
