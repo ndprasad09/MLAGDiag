@@ -31,6 +31,8 @@ def interVLANCheck():
     if len(MainList) != 0:
 
         for eachSwitch in MainList:
+            print ("[] Diag: VLAN Comparisons between Peers %d and %d:" % (eachSwitch[0],eachSwitch[1]))
+            print ("\n")
             MLAGList1 = []
             MLAGList2 = []
             ISC = str(eachSwitch[2])
@@ -49,21 +51,24 @@ def interVLANCheck():
             if len(diffMlag1) != 0:
                 for eachDiff in diffMlag1:
                     if eachDiff != 0:
-                        logging.error("MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[1]))
-                        Error_Logs.append("MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[1]))
+                        logging.error("\tFAIL: MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[1]))
+                        Error_Logs.append("\tFAIL: MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[1]))
             diffMlag2 = [x for x in MLAGList2 if x not in set(MLAGList1)]
             if len(diffMlag2):
                 for eachDiff in diffMlag2:
                     if eachDiff != 0:
-                        logging.error("MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[0]))
-                        Error_Logs.append("MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[0]))
+                        logging.error("\tFAIL: MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[0]))
+                        Error_Logs.append("\tFAIL: MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[0]))
 
             commonList = sorted(set(MLAGList1).intersection(MLAGList2))
             if len(commonList) != 0:
+
                 for eachListItem in commonList:
+                    error_flag = 0
                     if eachListItem == 0:
                         continue
                     else:
+                        print ("\tTEST: Checking VLAN Configurations Between Peers %s and %s for MLAG ID %d" %(switchID1,switchID2,eachListItem))
                         eachListItem = str(eachListItem)
                         tempVLANList1 = MLAGSQL.returnQuery(
                             "SELECT VlanName,VlanTag,Tagged from PortInfo WHERE SwitchID=" + switchID1 + " AND ISCID=" + ISC + " AND MLAGID=" + eachListItem + "")
@@ -110,13 +115,14 @@ def interVLANCheck():
                             index = TagList1.index(eachElement)
                             TagFlag = TagFlag1[index]
                             if TagFlag == 1:
-                                logging.error("VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
+                                logging.error("\tFAIL: VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
                                     eachElement, eachSwitch[1], eachListItem))
-                                Error_Logs.append("VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
+                                Error_Logs.append("\tFAIL: VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
                                     eachElement, eachSwitch[1], eachListItem))
+                                error_flag = error_flag + 1
                             else:
                                 UnTag = UnTag + 1
-                                logging.info("Port %s in VLAN %s is UnTagged in Switch ID %d for MLAG ID %s" % (
+                                logging.info("\tPort %s in VLAN %s is UnTagged in Switch ID %d for MLAG ID %s" % (
                                     PortList1[0], TagListName1[index], eachSwitch[0], eachListItem))
 
                         diffTagList2 = [x for x in TagList2 if x not in set(TagList1)]
@@ -124,10 +130,11 @@ def interVLANCheck():
                             index = TagList2.index(eachElement)
                             TagFlag = TagFlag2[index]
                             if TagFlag == 1:
-                                logging.error("VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
+                                logging.error("\tFAIL: VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
                                     eachElement, eachSwitch[0], eachListItem))
-                                Error_Logs.append("VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
+                                Error_Logs.append("\tFAIL: VLAN with Tag %d is not Present in Switch ID %d for MLAG ID %s" % (
                                     eachElement, eachSwitch[0], eachListItem))
+                                error_flag  = error_flag + 1
                             else:
                                 UnTag = UnTag + 1
                                 logging.info("Port %s in VLAN %s is UnTagged in Switch ID %d for MLAG ID %s" % (
@@ -139,9 +146,10 @@ def interVLANCheck():
                                 "SELECT MLAGPeerName from MLAGPeer WHERE SwitchID=" + switchID1 + " AND ISCID=" + ISC + "")
                             PeerName2 = MLAGSQL.returnQuery(
                                 "SELECT MLAGPeerName from MLAGPeer WHERE SwitchID=" + switchID2 + " AND ISCID=" + ISC + "")
-                            logging.error("UnTag VLAN Mismatch between Peers %s and %s" % (PeerName1[0], PeerName2[0]))
+                            logging.error("\tFAIL: UnTag VLAN Mismatch between Peers %s and %s" % (PeerName1[0], PeerName2[0]))
                             Error_Logs.append(
-                                "UnTag VLAN Mismatch between Peers %s and %s" % (PeerName1[0], PeerName2[0]))
+                                "\tFAIL: UnTag VLAN Mismatch between Peers %s and %s" % (PeerName1[0], PeerName2[0]))
+                            error_flag = error_flag + 1
 
                         # Matching VLAN Tags Between Between Two Switches
 
@@ -168,21 +176,28 @@ def interVLANCheck():
                                 else:
                                     if litem1[2] == 1:
                                         logging.error(
-                                            "Port %s in VLAN %s is added as Tagged in Switch ID %d and Port %s VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
+                                            "\tFAIL: Port %s in VLAN %s is added as Tagged in Switch ID %d and Port %s VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
                                                 PortList1[0], litem1[0], eachSwitch[0], PortList2[0], litem2[0],
                                                 eachSwitch[1], eachListItem))
                                         Error_Logs.append(
-                                            "Port %s in VLAN %s is added as Tagged in Switch ID %d and  Port %s in VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
+                                            "\tFAIL: Port %s in VLAN %s is added as Tagged in Switch ID %d and  Port %s in VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
                                                 PortList1[0], litem1[0], eachSwitch[0], PortList2[0], litem2[0],
                                                 eachSwitch[1], eachListItem))
+                                        error_flag = error_flag +1
                                     else:
                                         logging.error(
-                                            "Port %s in VLAN %s is added as Tagged in Switch ID %d and Port %s in VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
+                                            "\tFAIL: Port %s in VLAN %s is added as Tagged in Switch ID %d and Port %s in VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
                                                 PortList2[0],litem2[0], eachSwitch[1], PortList1[0],litem1[0], eachSwitch[0], eachListItem))
                                         Error_Logs.append(
-                                            "Port in VLAN %s is added as Tagged in Switch ID %d and Port %s in VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
+                                            "\tFAIL: Port in VLAN %s is added as Tagged in Switch ID %d and Port %s in VLAN %s is added as Untagged in Switch ID %d for MLAG ID %s" % (
                                                 PortList2[0],litem2[0], eachSwitch[1], PortList1[0],litem1[0], eachSwitch[0], eachListItem))
+                                        error_flag = error_flag + 1
 
+                    if error_flag == 0:
+                        print ("\tPASS: VLAN Configuration Test Passed between Peers %s and %s for MLAG ID %s" %(switchID1,switchID2,eachListItem))
+                        print ("\n")
+
+            print ("VLAN Comparison Finished Between Peers %s and %s" %(switchID1,switchID2))
 
                                         # Library.print_error(Error_Logs)
 
