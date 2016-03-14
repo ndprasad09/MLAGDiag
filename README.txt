@@ -16,6 +16,7 @@ You can checkout the project files from  https://github.com/ndprasad09/MLAGDiag
    - Library.py
    - vLanCheck.py
    - interVLANCheck.py
+   - MLAGPeer.py
  
 == Installation ==
 1. Extract the downloaded tar file (MLAGDiag.tar)
