@@ -22,7 +22,7 @@ def get_mlag_peer(handler,SwitchID):
     failure =0
 
     #-- Test start
-    print ("[] Diag: Checking MLAG Peer Configuration for %s" %(connect.SwitchID_switchInfo[SwitchID][0]))
+    print ("[] Diag: Getting MLAG Peer Configuration for %s .." %(connect.SwitchID_switchInfo[SwitchID][0]))
 
     #-- Disable cli paging in switch
     Library.SendCmd(handler,"disable clipaging")
@@ -84,7 +84,7 @@ def get_mlag_peer(handler,SwitchID):
         else:
             MLAGPorts = 0
             failure = failure + 1
-            print("\tFAIL:No MLAG ports present for Peer "+str(PeerName))
+            print("\tERROR:No MLAG ports present for Peer "+str(PeerName))
             continue
 
         #-- ISC vlan
@@ -147,17 +147,17 @@ def get_mlag_peer(handler,SwitchID):
             if ISCPortlength:
                 ISCvlanport = ISCPort[0]
                 if ISCPortlength > 1:
-                    print("\tFAIL: Number of ports present in ISC vlan "+str(ISCVlan)+" = "+str(ISCPortlength)+ "!!!!")
+                    print("\tERROR: Number of ports present in ISC vlan "+str(ISCVlan)+" = "+str(ISCPortlength))
                     failure = failure + 1
                     continue
 
             else :
-                print("\tFAIL: No Ports found in ISC Vlan : "+ISCVlan+" for Peer "+PeerName)
+                print("\tERROR: No Ports found in ISC Vlan : "+ISCVlan+" for Peer "+PeerName)
                 failure = failure + 1
                 continue
 
         else:
-            print("\tFAIL: No ISCVlan present !!! for Peer "+PeerName)
+            print("\tERROR: No ISCVlan present for Peer "+PeerName)
             failure = failure + 1
             continue
         if ISCvlanport:
@@ -165,6 +165,8 @@ def get_mlag_peer(handler,SwitchID):
         #-- Add to Database
         MLAGSQL.AddMLAGPeerInstance(SwitchID,ISCId,ISCvlanport,PeerName,VirtualRouter,PeerIPAddress,ISCVlan,LocalIPAddress,ISCVlanID,CheckpointStatus,Authentication,MLAGPorts)
     if failure:
-        print ("\tFAIL: Checking MLAG Peer Configuration failed")
+        logging.info("\tFAIL:Getting MLAG Peer Configuration")
     else:
-        print ("\tPASS: Checking MLAG Peer Configuration")
+        logging.info("\tPASS: Getting MLAG Peer Configuration")
+    # Print New Line
+    print()
