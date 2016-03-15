@@ -77,7 +77,7 @@ def MlagPort(handle, SwitchID):
     for peer in mlag_peer:
         # Obtain the Distict ISIC ID from the MLAGPeer Table
         ISC_ID = MLAGSQL.c.execute(
-            "SELECT DISTINCT ISCID from MLAGPeer where SwitchID = '%s'" % (SwitchID))
+            "SELECT DISTINCT ISCID from MLAGPeer where SwitchID = '%s' and MLAGPeerName = '%s'" % (SwitchID, peer))
         ISCid = ISC_ID.fetchall()
         for id in ISCid:
             # Obtain the ISC Port for each ISCID and SwitchID pair
