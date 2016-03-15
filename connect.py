@@ -13,9 +13,9 @@ import logging
 # --- Global variables
 #######################
 global SwitchID_handlerdict
-global switchInfo
+global SwitchID_switchInfo
 SwitchID_handlerdict = {}
-switchInfo = []
+SwitchID_switchInfo = {}
 #########################################
 # - Procedures
 ######################################
@@ -72,7 +72,8 @@ def ConnecttoSwitches():
              values as connection handler object
     """
     global SwitchID_handlerdict
-    global switchInfo
+    global SwitchID_switchInfo
+    switchInfo = []
     switchIDList = []
     switchIPList = []
     connHandler = []
@@ -130,6 +131,8 @@ def ConnecttoSwitches():
                 connHandler.append(retVal)
                 break
         SwitchID_handlerdict = dict(zip(switchIDList, connHandler))
+        SwitchID_switchInfo = dict(zip(switchIDList,switchInfo))
+        GetSwitchInfo()
 
 
 def Closeconnectiontoswitches():
@@ -144,3 +147,43 @@ def Closeconnectiontoswitches():
             logging.info("Connection closed succesfully")
     except:
         logging.error("Could not close the connection !!!")
+
+def GetSwitchInfo():
+    """
+    This function gets switch specific information
+    :return:
+    """
+
+    global SwitchID_switchInfo
+    global SwitchID_handlerdict
+
+    for switchid in SwitchID_handlerdict:
+        switchinfo = []
+        SwitchIP=SwitchID_switchInfo[switchid][1]
+        retString = Library.SendCmd(SwitchID_handlerdict[switchid],"show switch")
+        match = re.search(r'System\s+MAC:\s+(.*)\n',retString)
+        if match:
+             SwitchMAC = match.groups(1)[0].strip('\r')
+        else :
+            SwitchMAC = "UNKnown"
+        SwitchID_switchInfo[switchid].extend(SwitchMAC)
+        match = re.search(r'SysName:\s+(.*)\n',retString)
+        if match:
+             SwitchName = match.groups(1)[0].strip('\r')
+        else :
+            SwitchName = "UNKnown"
+
+        switchinfo.append(SwitchIP)
+        switchinfo.append(SwitchMAC)
+        switchinfo.append(SwitchName)
+        SwitchID_switchInfo[switchid] = list(switchinfo)
+def DisplaySwitchInfo(switchID):
+    """
+    Display the switch specific info for switch ID
+    :return:
+    """
+    global SwitchID_switchInfo
+    global SwitchID_handlerdict
+    print ("\tSwitch Name:  "+str(SwitchID_switchInfo[switchID][2]))
+    print ("\tSwitch IP:  "+str(SwitchID_switchInfo[switchID][0]))
+    print ("\tSwitch MAC:  "+str(SwitchID_switchInfo[switchID][1]))
