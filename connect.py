@@ -9,6 +9,7 @@ import re
 import Library
 import logging
 
+
 #######################
 # --- Global variables
 #######################
@@ -44,6 +45,7 @@ def Connect(host, username, password):
             sHandler.write(username + "\n")
             sHandler.read_until("password")
             sHandler.write(password + "\n")
+
             retIndex, retObj, retStr = sHandler.expect(['.*#', 'incorrect'])
 
             if retIndex == 1:
@@ -51,10 +53,10 @@ def Connect(host, username, password):
                 return -1
 
             else:
-                print "\n!!!!Connection Successfull!!!\n"
-            # prompt=re.compile(r'.\d+\s[#>]\s$')
-            # sHandler.expect ([prompt])
-            # SendCmd ("disable clip")
+
+                sHandler.write("disable clipaging")
+                sHandler.read_until("disable clipaging") #Clearing the Buffer after Login Prompt; Will be useful if Banner is present.
+                print ("\n!!!!Connection Successfull!!!\n")
             return sHandler
 
     except socket.timeout:
@@ -74,7 +76,6 @@ def ConnecttoSwitches():
     global SwitchID_handlerdict
     global switchInfo
     switchIDList = []
-    switchIPList = []
     connHandler = []
     switchNum = raw_input("Please Enter Number of MLAG Switches to Debug: ")
     switchNum = int(switchNum)
@@ -115,8 +116,8 @@ def ConnecttoSwitches():
 
         while True:
             username = raw_input('Please Enter UserName of Switch %d: ' % eachSwitch)
-            # password = getpass.getpass (prompt = 'Enter your Password of Switch: ')
-            password = raw_input('Please Enter Password of Switch %d: ' % eachSwitch)
+            password = getpass.getpass (prompt = 'Enter your Password of Switch %d: '%eachSwitch)
+            #password = raw_input('Please Enter Password of Switch %d: ' % eachSwitch)
             print "\n!!!Connecting to the Switch %d. Please Wait!!!" % eachSwitch
 
             retVal = Connect(switchIP, username, password)
@@ -144,3 +145,8 @@ def Closeconnectiontoswitches():
             logging.info("Connection closed succesfully")
     except:
         logging.error("Could not close the connection !!!")
+
+
+def connectPexpect (host,username, password):
+    child = pexpect.spawn('telnet '+host+'')
+    print child
