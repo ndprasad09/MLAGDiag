@@ -51,10 +51,10 @@ def Connect(host, username, password):
                 return -1
 
             else:
-                print "\n!!!!Connection Successfull!!!\n"
-            # prompt=re.compile(r'.\d+\s[#>]\s$')
-            # sHandler.expect ([prompt])
-            # SendCmd ("disable clip")
+                sHandler.write("disable clipaging" + "\n")
+                retStr = sHandler.read_until("disable clipaging") #Clearing the Buffer after Login Prompt; Will be useful if Banner is present.
+                sHandler.read_until("#")
+                print ("\n!!!!Connection Successfull!!!\n")
             return sHandler
 
     except socket.timeout:
