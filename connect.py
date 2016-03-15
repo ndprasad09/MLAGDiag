@@ -91,7 +91,7 @@ def ConnecttoSwitches():
                 socket.inet_aton(switchIP)
 
             except socket.error:
-                print "!!!IP address Entered is Invalid!!!"
+                print ("!!!IP address Entered is Invalid!!!")
                 continue
             else:
 
