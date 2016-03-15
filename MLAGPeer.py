@@ -84,7 +84,7 @@ def get_mlag_peer(handler,SwitchID):
         else:
             MLAGPorts = 0
             failure = failure + 1
-            logging.error("FAIL:No MLAG ports present for Peer "+str(PeerName))
+            print("\tFAIL:No MLAG ports present for Peer "+str(PeerName))
             continue
 
         #-- ISC vlan
