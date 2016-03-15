@@ -34,27 +34,28 @@ def Connect(host, username, password):
         if sHandler == 0:
             sHandler = telnetlib.Telnet(host)
 
-            print ("\nConnecting in 3 Seconds")
-            for i in range(3):
-                sys.stdout.write(".")
-                sys.stdout.flush()
-                time.sleep(1)
+
 
             sHandler.read_until("login")
             sHandler.write(username + "\n")
             sHandler.read_until("password")
             sHandler.write(password + "\n")
-            retIndex, retObj, retStr = sHandler.expect(['.*#', 'incorrect'])
+            retIndex, retObj, retStr = sHandler.expect(['.#', 'incorrect'])
 
             if retIndex == 1:
                 print ("\n!!! Error: InValid Credentials !!!\n")
                 return -1
 
             else:
-                sHandler.write("disable clipaging" + "\n")
-                retStr = sHandler.read_until("disable clipaging") #Clearing the Buffer after Login Prompt; Will be useful if Banner is present.
+                print ("\nConnecting in 3 Seconds") #Introducing Delay of 3 Seconds to wait for the Banner to load if any
+                for i in range(3):
+                    sys.stdout.write(".")
+                    sys.stdout.flush()
+                    time.sleep(1)
+                print ("\n")
+                sHandler.write("disable clipaging" + "\n ")
+                sHandler.read_until("disable clipaging") #Clearing the Buffer after Login Prompt; Will be useful if Banner is present.
                 sHandler.read_until("#")
-                print ("\n!!!!Connection Successfull!!!\n")
             return sHandler
 
     except socket.timeout:
