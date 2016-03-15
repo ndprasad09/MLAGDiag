@@ -2,11 +2,17 @@ import MLAGSQL
 import logging
 import Library
 
-
+"""
+This Procedure compares MLAG and VLAN Information
+Between MLAG Peers and displays the Error logs
+if anything found
+:return: None
+"""
 def interVLANCheck():
+
     Error_Logs = []
     Pass_Logs = []
-
+    print ("[] Diag: VLAN Comparisons Between MLAG Peers")
     retList = MLAGSQL.returnQuery("SELECT DISTINCT ISCID from PortInfo")
     ISCList = []
     MainList = []
@@ -17,7 +23,6 @@ def interVLANCheck():
     for eachISC in ISCList:
         strISC = str(eachISC)
         retList = MLAGSQL.returnQuery("SELECT DISTINCT SwitchID from PortInfo WHERE ISCID=" + strISC + "")
-
         tempList = []
         if len(retList) == 2:
             for eachItem in retList:
@@ -26,6 +31,7 @@ def interVLANCheck():
             tempList.append(eachISC)
             MainList.append(tempList)
         else:
+            print ("\tFAIL: No Valid MLAG Peer detected for Switch ID %d" %(retList[0][0]))
             continue
 
     if len(MainList) != 0:
