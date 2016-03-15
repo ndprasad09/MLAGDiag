@@ -3,10 +3,10 @@ import logging
 import connect
 import Library
 import re
+import sys
 #-- Global variables
 global ISCId
 ISCId = 0
-
 def get_mlag_peer(handler,SwitchID):
     """
     This procedure collects MLAG Peer Information
@@ -18,6 +18,12 @@ def get_mlag_peer(handler,SwitchID):
     """
     #-- Global variables
     global ISCId
+    #-- local variable
+    failure =0
+
+    #-- Test start
+    print ("[] Diag: Checking MLAG Peer Configuration for %s" %(connect.SwitchID_switchInfo[SwitchID][0]))
+
     #-- Disable cli paging in switch
     Library.SendCmd(handler,"disable clipaging")
     #-- Get the show mlag peer output
@@ -29,9 +35,11 @@ def get_mlag_peer(handler,SwitchID):
     if PeerNameexistlist:
         logging.info("MLAG Peers are present")
     else:
-        logging.error("No MLAG Peer Exists in Switch ID : "+str(SwitchID))
-        logging.error("Returning with failure to update the MLAG Peer Instance")
-        return
+
+        print("\tFAIL: No MLAG Peer Exists in Switch:")
+        connect.DisplaySwitchInfo(SwitchID)
+        connect.Closeconnectiontoswitches()
+        sys.exit()
 
     #-- split the output MLAG peerwise
     outputpart = Library.split_before("MLAG\s+Peer\s+:",wholeoutput)
@@ -75,7 +83,9 @@ def get_mlag_peer(handler,SwitchID):
             MLAGPorts = int(match.groups(1)[0])
         else:
             MLAGPorts = 0
-            logging.error("No MLAG ports present")
+            failure = failure + 1
+            logging.error("FAIL:No MLAG ports present for Peer "+str(PeerName))
+            continue
 
         #-- ISC vlan
         ISCVlanpresent = re.search (r"VLAN\s+:\s+(.*\S+)\s+Virtual.*Router.*",output)
@@ -136,21 +146,25 @@ def get_mlag_peer(handler,SwitchID):
             ISCPortlength = len(ISCPort)
             if ISCPortlength:
                 ISCvlanport = ISCPort[0]
-                #--FIX ME
                 if ISCPortlength > 1:
-                    logging.error("Number of ports present in ISC vlan "+str(ISCVlan)+"="+str(ISCPortlength)+ "!!!!")
-                    logging.info("Go for the trunked port if exists as ISC Port since it is most configured ")
-                    for port in ISCPort:
-                        match = re.search(r".*g",port)
-                        if match:
-                           ISCvlanport = port.strip('g')
-                           break
+                    print("\tFAIL: Number of ports present in ISC vlan "+str(ISCVlan)+" = "+str(ISCPortlength)+ "!!!!")
+                    failure = failure + 1
+                    continue
+
             else :
-                logging.error("No Ports found in ISC Vlan : "+ISCVlan)
+                print("\tFAIL: No Ports found in ISC Vlan : "+ISCVlan+" for Peer "+PeerName)
+                failure = failure + 1
+                continue
+
         else:
-            logging.error("No ISCVlan present !!!")
+            print("\tFAIL: No ISCVlan present !!! for Peer "+PeerName)
+            failure = failure + 1
+            continue
         if ISCvlanport:
             ISCvlanport = str(ISCvlanport.strip('g'))
         #-- Add to Database
         MLAGSQL.AddMLAGPeerInstance(SwitchID,ISCId,ISCvlanport,PeerName,VirtualRouter,PeerIPAddress,ISCVlan,LocalIPAddress,ISCVlanID,CheckpointStatus,Authentication,MLAGPorts)
-
+    if failure:
+        print ("\tFAIL: Checking MLAG Peer Configuration failed")
+    else:
+        print ("\tPASS: Checking MLAG Peer Configuration")
