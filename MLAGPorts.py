@@ -29,7 +29,7 @@ def MlagPort(handle, SwitchID):
     for x in lines:
         # Regex for the mlag_id, port_id, mlag_peer in format (45   22  A  Up  Peer1)
         mlag_info = re.search(
-            '^([0-9]+)\s+([0-9]+(:[0-9]+|(?!:)))\s+(A|R|D|NP)\s+(Up|Down|N\/A)\s+([A-Za-z][A-Za-z0-9]+)\s+', x)
+            '^([0-9]+)\s+([0-9]+(:[0-9]+|(?!:)))\s+(A|R|D|NP)\s+(Up|Down|N\/A)\s+([A-Za-z][A-Za-z0-9-_]+)\s+', x)
         if mlag_info:
             if mlag_info.group(1):
                 # Record for MLAG ID
