@@ -37,7 +37,7 @@ def interVLANCheck():
     if len(MainList) != 0:
 
         for eachSwitch in MainList:
-            print ("[] Diag: VLAN Comparisons between Peers %d and %d:" % (eachSwitch[0],eachSwitch[1]))
+            #print ("[] Diag: VLAN Comparisons between Peers %d and %d:" % (eachSwitch[0],eachSwitch[1]))
             MLAGList1 = []
             MLAGList2 = []
             ISC = str(eachSwitch[2])
@@ -204,13 +204,13 @@ def interVLANCheck():
 
             else:
                 print ("\tNo Common MLAG ID detected between Peer %s and %s" %(switchID1,switchID2))
-            print ("VLAN Comparison Finished Between Peers %s and %s" %(switchID1,switchID2))
+            #print ("VLAN Comparison Finished Between Peers %s and %s" %(switchID1,switchID2))
 
                                         # Library.print_error(Error_Logs)
 
     else:
         #logging.info("No Items to be Compared between Switch")
-        print ("[] Diag: No VLAN Comparisons between switch peers")
+        print ("\tFAIL: No VLAN Comparisons between switch peers")
         return
 
 
