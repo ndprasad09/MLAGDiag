@@ -9,7 +9,8 @@ import interVLANCheck
 # The default level is WARNING(30). The available levels are INFO(20),DEBUG(10),ERROR(40) and CRITICAL(50)
 # Use the approppriate log levels for debug print outputs
 logging.basicConfig(level=logging.INFO)
-#logging.disable(logging.INFO)
+logging.disable(logging.INFO)
+logging.disable(logging.ERROR)
 
 """
 -> Connect to DB and create Tables
