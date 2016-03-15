@@ -9,11 +9,20 @@ import interVLANCheck
 # The default level is WARNING(30). The available levels are INFO(20),DEBUG(10),ERROR(40) and CRITICAL(50)
 # Use the approppriate log levels for debug print outputs
 logging.basicConfig(level=logging.INFO)
+logging.disable(logging.INFO)
 
 """
 -> Connect to DB and create Tables
 -> Connect to the Switches and return handler
 """
+
+#Adding Disclaimer
+print ("DISCLAIMER:")
+print ("This Program is to diagnose the MLAG Configuration between peers")
+print ("This Program does not make any changes to any switch configuration")
+print ("It is free software and it comes without any Warranty")
+print ("\n")
+
 # Connect to the Database
 MLAGSQL.ConnectDatabase()
 
