@@ -3,6 +3,7 @@ import Library
 import MLAGSQL
 import logging
 import re
+import connect
 
 
 #####################################################################################################
@@ -15,7 +16,7 @@ import re
 def MlagPort(handle, SwitchID):
 
     ### Disable CLI Paging to capture the whole output from the CLI
-    print ("[] Diag: Checking MLAG Port Configuration for SwitchID %s" %(SwitchID))
+    print ("[] Diag: Checking MLAG Port Configuration for Switch %s .." %(connect.SwitchID_switchInfo[int(SwitchID)][0]))
     Library.SendCmd(handle, "disable clipaging")
 
 ### Show Mlag ports to capture MLAG id, Port ID and MLAG Peer Info in  Lists(mlag_id, port_id, mlag_peer )
@@ -83,7 +84,7 @@ def MlagPort(handle, SwitchID):
                 MLAGSQL.AddPortInfo(SwitchID, ISCList[0][0], index1, index2, index[0], index[1], index[2])
         else:
             logging.error("Configuration Issue : No Vlan Information found for respective port %s" % (index1))
-            print ("\tFAIL: Configuration Issue : No Vlan Information found for respective port %s" % (index1))
+            print ("\tFAIL: Configuration Issue : No Vlan Information found for respective port %s  in MLAG ID %s" % (index1,index2))
             Failure = Failure + 1
 
    ### Union of the List MLAG Peer to obtain a List of distict MLAG Peers
@@ -130,6 +131,7 @@ def MlagPort(handle, SwitchID):
 
 
     if Failure == 0:
-        print ("\tPASS: Checking MLAG Port Configuration for SwitchID %s" %(SwitchID))
+        #print ("\tPASS: Checking MLAG Port Configuration for SwitchID %s" %(SwitchID))
+        print ("")
     #else:
         #print ("\tFAIL: Checking MLAG Port Configuration for SwitchID %s" %(SwitchID))
