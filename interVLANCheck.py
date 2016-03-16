@@ -79,6 +79,7 @@ def interVLANCheck():
 
             if Mlagid_error == 0:
                 print ("\tPASS: MLAG ID Comparison passed between Peers %s and %s" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0]))
+            print ("")
             commonList = sorted(set(MLAGList1).intersection(MLAGList2))
             #commonList.remove(0) #Removing MLAGID of ISC Vlan. 0 is MLAG ID of ISC VLAN
             if len(commonList) != 0:
@@ -140,7 +141,7 @@ def interVLANCheck():
 
                         #print tempISCList2
                     else:
-                        print ("\n")
+                        print ("")
                         print ("\tTEST: Checking VLAN Configurations Between Peers %s and %s for MLAG ID %d" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0],eachListItem))
                         eachListItem = str(eachListItem)
                         tempVLANList1 = MLAGSQL.returnQuery(
