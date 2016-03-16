@@ -33,7 +33,9 @@ def interVLANCheck():
             MainList.append(tempList)
         else:
             switchID = retList[0][0]
-            print ("\tFAIL: No Valid MLAG Peer detected for Switch with IP %s" %(connect.SwitchID_switchInfo[int(switchID)][0]))
+            MLAGPeer = MLAGSQL.returnQuery("SELECT MLAGPeerName from MLAGPeer WHERE ISCID=" + strISC + " AND SwitchID= "+ str(switchID)+"")
+            if len(MLAGPeer) !=0:
+                print ("\tFAIL: No Valid MLAG Peer detected for Peer %s for Switch with IP %s" %(MLAGPeer[0][0],connect.SwitchID_switchInfo[int(switchID)][0]))
             continue
 
     if len(MainList) != 0:
@@ -101,7 +103,7 @@ def interVLANCheck():
                         else:
                             logging.error("ISC Vlan Information not found for Switch IP %s" %(connect.SwitchID_switchInfo[int(switchID1)][0]))
 
-                        #Querting Information from Switch ID2
+                        #Querying Information from Switch ID2
                         ISCVlanName = MLAGSQL.returnQuery("SELECT ISCVlanName from MLAGPeer WHERE SwitchID=" + switchID2 + " AND ISCID=" + ISC + "")
                         tempISCList2 = MLAGSQL.returnQuery(
                            "SELECT VlanTag,Tagged from PortInfo WHERE SwitchID=" + switchID2 + " AND ISCID=" + ISC + "  AND VlanName='%s'" % (ISCVlanName[0][0]))
@@ -114,26 +116,28 @@ def interVLANCheck():
 
                         #ISC VLAN Comparison
 
-
-                        TagFlag1 = ISCVlanList1[1]
-                        TagFlag2 = ISCVlanList2[1]
-                        if TagFlag1 == TagFlag2:
-                            if TagFlag1 == 1: #Condition for Tagged
-                                if TagFlag1 != TagFlag2:
-                                    print ("\tFAIL: ISC VLAN Tag does not match between peers %s and %s" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                        if len(ISCVlanList1) !=0 and len(ISCVlanList2)!=0:
+                            TagFlag1 = ISCVlanList1[1]
+                            TagFlag2 = ISCVlanList2[1]
+                            if TagFlag1 == TagFlag2:
+                                if TagFlag1 == 1: #Condition for Tagged
+                                    if TagFlag1 != TagFlag2:
+                                        print ("\tFAIL: ISC VLAN Tag does not match between peers %s and %s" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                                    else:
+                                        print ("\tPASS: ISC VLAN Comparison passed between peers %s and %s" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
                                 else:
-                                    print ("\tPASS: ISC VLAN Comparison passed between peers %s and %s" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                                    logging.info ("ISC Ports are added as Untagged between switch peers %s and %s"% (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                                    print ("\tPASS: ISC VLAN between peers %s and %s are same" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+
+
                             else:
-                                logging.info ("ISC Ports are added as Untagged between switch peers %s and %s"% (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
-                                print ("\tPASS: ISC VLAN between peers %s and %s are same" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
 
-
+                                if TagFlag1 == 1:
+                                    print ("\tFAIL: ISC Port is added as Tagged in switch IP %s and Untagged in switch IP %s for ISC VLAN" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                                else:
+                                    print ("\tFAIL: ISC Port is added as Tagged in switch IP %s and Untagged in switch IP %s for ISC VLAN" % (connect.SwitchID_switchInfo[int(switchID2)][0], connect.SwitchID_switchInfo[int(switchID1)][0]))
                         else:
-
-                            if TagFlag1 == 1:
-                                print ("\tFAIL: ISC Port is added as Tagged in switch IP %s and Untagged in switch IP %s for ISC VLAN" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
-                            else:
-                                print ("\tFAIL: ISC Port is added as Tagged in switch IP %s and Untagged in switch IP %s for ISC VLAN" % (connect.SwitchID_switchInfo[int(switchID2)][0], connect.SwitchID_switchInfo[int(switchID1)][0]))
+                          print ("\tFAIL: Unable to get ISC VLAN Info")
 
 
 
