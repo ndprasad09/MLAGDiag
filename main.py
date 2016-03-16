@@ -9,7 +9,7 @@ import interVLANCheck
 # The default level is WARNING(30). The available levels are INFO(20),DEBUG(10),ERROR(40) and CRITICAL(50)
 # Use the approppriate log levels for debug print outputs
 logging.basicConfig(level=logging.INFO)
-logging.disable(logging.INFO)
+#logging.disable(logging.INFO)
 logging.disable(logging.ERROR)
 
 """
@@ -45,8 +45,14 @@ for key in SwitchID_handler:
     MLAGPeer.get_mlag_peer(SwitchID_handler[key],key)
     MLAGSQL.DebugShowMLAGTable()
 
+
+
 #--ISIC Replace call from Validation Library - To unify the ISC ID across switches
 ValidationLib.replaceISCID()
+
+
+MLAGSQL.DebugShowMLAGTable()
+
 
 #-- AddMLAGPortInstance - Population of Port- Vlan Information in the PortInfo Table
 for key in SwitchID_handler:
@@ -57,6 +63,9 @@ MLAGSQL.DebugShowPortTable()
 
 connect.Closeconnectiontoswitches()
 
+#--- Calling CheckMLAGStatus()
+ValidationLib.CheckMLAGStatus()
+
 #Debug functions to see table content
 """
 -> Function calls for MLAG data validation
@@ -64,8 +73,7 @@ CheckMLAG
 CheckVLAN
 Check Inter Vlan
 """
-#--- Calling CheckMLAGStatus()
-ValidationLib.CheckMLAGStatus()
+
 
 #--- Calling VlanCheck()
 vLanCheck.VlanCheck()
@@ -86,4 +94,4 @@ MLAGSQL.DeleteTables()
 #Disconnect the database
 MLAGSQL.CloseDatabase()
 
-print ("Diag Completed!")
+print ("\nDiag Completed!")

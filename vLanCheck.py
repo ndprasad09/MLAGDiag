@@ -15,7 +15,7 @@ def CompareVlansBetween(ISCPortVLAN, MLAGPortVLAN):
         print (isc_vlan)
     else:
 	print ("\tPASS: ISC Port is associated in all MLAG VLAN(s)")
-    print ("\n")
+    print ("")
 
 def VlanCheck():
 
@@ -28,7 +28,7 @@ def VlanCheck():
     GetSwId=c.execute("SELECT DISTINCT SwitchID FROM PortInfo")
     for SwID in GetSwId.fetchall():
         SwID=SwID[0]
-        print("\n[] Diag: PEER%s VLAN Check Between ISC and MLAG ID" % SwID)
+        print("[] Diag: PEER%s VLAN Check Between ISC and MLAG ID" % SwID)
 
         ''' Loop-1.1: Go by ISC ID from Table '''
         result=c.execute("SELECT DISTINCT ISCID FROM PortInfo WHERE SwitchID='%s';" %(SwID))

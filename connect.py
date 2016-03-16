@@ -47,7 +47,8 @@ def Connect(host, username, password):
                 return -1
 
             else:
-                print ("\nConnecting in 3 Seconds") #Introducing Delay of 3 Seconds to wait for the Banner to load if any
+                print ("")
+                sys.stdout.write ("Connecting in 3 Seconds ") #Introducing Delay of 3 Seconds to wait for the Banner to load if any
                 for i in range(3):
                     sys.stdout.write(".")
                     sys.stdout.flush()

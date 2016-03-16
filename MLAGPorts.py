@@ -16,7 +16,7 @@ import connect
 def MlagPort(handle, SwitchID):
 
     ### Disable CLI Paging to capture the whole output from the CLI
-    print ("[] Diag: Checking MLAG Port Configuration for Switch %s .." %(connect.SwitchID_switchInfo[int(SwitchID)][0]))
+    print ("[] Diag: Getting MLAG Port Configuration for the Switch %s .." %(connect.SwitchID_switchInfo[int(SwitchID)][0]))
     Library.SendCmd(handle, "disable clipaging")
 
 ### Show Mlag ports to capture MLAG id, Port ID and MLAG Peer Info in  Lists(mlag_id, port_id, mlag_peer )
