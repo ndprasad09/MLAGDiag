@@ -169,4 +169,4 @@ def get_mlag_peer(handler,SwitchID):
     else:
         logging.info("\tPASS: Getting MLAG Peer Configuration")
     # Print New Line
-    print()
+    print ("")
