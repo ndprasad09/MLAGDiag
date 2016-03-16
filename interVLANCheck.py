@@ -50,6 +50,7 @@ def interVLANCheck():
             print ("\tTEST: MLAG ID Comparison between Peers %s and %s" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0]))
             tempMLAGList1 = MLAGSQL.returnQuery(
                 "SELECT DISTINCT MLAGID from PortInfo WHERE SwitchID=" + switchID1 + " AND ISCID=" + ISC + "")
+
             tempMLAGList2 = MLAGSQL.returnQuery(
                 "SELECT DISTINCT MLAGID from PortInfo WHERE SwitchID=" + switchID2 + " AND ISCID=" + ISC + "")
             for eachMLAG in tempMLAGList1:
@@ -60,28 +61,84 @@ def interVLANCheck():
             diffMlag1 = [x for x in MLAGList1 if x not in set(MLAGList2)]
             if len(diffMlag1) != 0:
                 for eachDiff in diffMlag1:
+
+
                     if eachDiff != 0:
                         logging.error("\tFAIL: MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[1]))
-                        print("\tFAIL: MLAG ID %d is not Present in Switch with IP %s" % (eachDiff, connect.SwitchID_switchInfo[int(eachSwitch[1])][0]))
+                        print("\tFAIL: MLAG ID %d may not be Present in Switch %s or MLAG Port is not associated with any VLAN" % (eachDiff, connect.SwitchID_switchInfo[int(eachSwitch[1])][0]))
                         Mlagid_error = Mlagid_error + 1
             diffMlag2 = [x for x in MLAGList2 if x not in set(MLAGList1)]
             if len(diffMlag2):
                 for eachDiff in diffMlag2:
+
+
                     if eachDiff != 0:
                         logging.error("\tFAIL: MLAG ID %d is not Present in SwitchID %d" % (eachDiff, eachSwitch[0]))
-                        print ("\tFAIL: MLAG ID %d is not Present in Switch with IP %s" % (eachDiff, connect.SwitchID_switchInfo[int(eachSwitch[0])][0]))
+                        print ("\tFAIL: MLAG ID %d may not be Present in Switch %s or MLAG Port is not associated with any VLAN" % (eachDiff, connect.SwitchID_switchInfo[int(eachSwitch[0])][0]))
                         Mlagid_error = Mlagid_error + 1
 
             if Mlagid_error == 0:
                 print ("\tPASS: MLAG ID Comparison passed between Peers %s and %s" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0]))
             commonList = sorted(set(MLAGList1).intersection(MLAGList2))
-            commonList.remove(0) #Removing MLAGID of ISC Vlan. 0 is MLAG ID of ISC VLAN
+            #commonList.remove(0) #Removing MLAGID of ISC Vlan. 0 is MLAG ID of ISC VLAN
             if len(commonList) != 0:
 
                 for eachListItem in commonList:
                     error_flag = 0
                     if eachListItem == 0:
-                        continue
+
+                        eachListItem = str(eachListItem)
+                        print ("\tTEST: Checking ISC VLAN Configuration between Peers %s and %s" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0]))
+
+                        #Querying Information from SwitchID1
+                        ISCVlanName = MLAGSQL.returnQuery("SELECT ISCVlanName from MLAGPeer WHERE SwitchID=" + switchID1 + " AND ISCID=" + ISC + "")
+                        tempISCList1 = MLAGSQL.returnQuery(
+                           "SELECT VlanTag,Tagged from PortInfo WHERE SwitchID=" + switchID1 + " AND ISCID=" + ISC + "  AND VlanName='%s'" % (ISCVlanName[0][0]))
+
+                        if len(tempISCList1) != 0:
+                            ISCVlanList1 = tempISCList1[0]
+                        else:
+                            logging.error("ISC Vlan Information not found for Switch IP %s" %(connect.SwitchID_switchInfo[int(switchID1)][0]))
+
+                        #Querting Information from Switch ID2
+                        ISCVlanName = MLAGSQL.returnQuery("SELECT ISCVlanName from MLAGPeer WHERE SwitchID=" + switchID2 + " AND ISCID=" + ISC + "")
+                        tempISCList2 = MLAGSQL.returnQuery(
+                           "SELECT VlanTag,Tagged from PortInfo WHERE SwitchID=" + switchID2 + " AND ISCID=" + ISC + "  AND VlanName='%s'" % (ISCVlanName[0][0]))
+
+                        if len(tempISCList2) != 0:
+                            ISCVlanList2 = tempISCList2[0]
+                        else:
+                            logging.error("ISC Vlan Information not found for Switch IP %s" %(connect.SwitchID_switchInfo[int(switchID2)][0]))
+
+
+                        #ISC VLAN Comparison
+
+
+                        TagFlag1 = ISCVlanList1[1]
+                        TagFlag2 = ISCVlanList2[1]
+                        if TagFlag1 == TagFlag2:
+                            if TagFlag1 == 1: #Condition for Tagged
+                                if TagFlag1 != TagFlag2:
+                                    print ("\tFAIL: ISC VLAN Tag does not match between peers %s and %s" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                                else:
+                                    print ("\tPASS: ISC VLAN Comparison passed between peers %s and %s" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                            else:
+                                logging.info ("ISC Ports are added as Untagged between switch peers %s and %s"% (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                                print ("\tPASS: ISC VLAN Comparison passed between peers %s and %s" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+
+
+                        else:
+
+                            if TagFlag1 == 1:
+                                print ("\tFAIL: ISC Port is added as Tagged in switch IP %s and Untagged in switch IP %s for ISC VLAN" % (connect.SwitchID_switchInfo[int(switchID1)][0], connect.SwitchID_switchInfo[int(switchID2)][0]))
+                            else:
+                                print ("\tFAIL: ISC Port is added as Tagged in switch IP %s and Untagged in switch IP %s for ISC VLAN" % (connect.SwitchID_switchInfo[int(switchID2)][0], connect.SwitchID_switchInfo[int(switchID1)][0]))
+
+
+
+
+
+                        #print tempISCList2
                     else:
                         print ("\n")
                         print ("\tTEST: Checking VLAN Configurations Between Peers %s and %s for MLAG ID %d" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0],eachListItem))
@@ -208,12 +265,12 @@ def interVLANCheck():
                                                 PortList2[0],litem2[0], connect.SwitchID_switchInfo[int(eachSwitch[1])][0], PortList1[0],litem1[0], connect.SwitchID_switchInfo[int(eachSwitch[0])][0], eachListItem))
                                         error_flag = error_flag + 1
 
-                    if error_flag == 0:
-                        print ("\tPASS: VLAN Configuration Test Passed between Peers %s and %s for MLAG ID %s" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0],eachListItem))
+                            if error_flag == 0:
+                                print ("\tPASS: VLAN Configuration Test Passed between Peers %s and %s for MLAG ID %s" %(connect.SwitchID_switchInfo[int(switchID1)][0],connect.SwitchID_switchInfo[int(switchID2)][0],eachListItem))
 
 
             else:
-                print ("\tNo Common MLAG ID detected between Peer %s and %s" %(connect.SwitchID_switchInfo[switchID1][0],connect.SwitchID_switchInfo[switchID2][0]))
+                print ("\tFAIL: No Common MLAG ID detected between Peer %s and %s" %(connect.SwitchID_switchInfo[switchID1][0],connect.SwitchID_switchInfo[switchID2][0]))
             #print ("VLAN Comparison Finished Between Peers %s and %s" %(switchID1,switchID2))
 
                                         # Library.print_error(Error_Logs)
