@@ -15,7 +15,7 @@ def CompareVlansBetween(ISCPortVLAN, MLAGPortVLAN):
         print (isc_vlan)
     else:
 	print ("\tPASS: ISC Port is associated in all MLAG VLAN(s)")
-    print ("\n")
+    print ("")
 
 def VlanCheck():
 
