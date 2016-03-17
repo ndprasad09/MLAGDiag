@@ -83,9 +83,11 @@ def ConnecttoSwitches():
         switchNum = raw_input("Please Enter Number of MLAG Switches to Debug: ")
         try:
             switchNum = int(switchNum)
-            if not switchNum >1 and switchNum < 10:
+            if not (switchNum >1 and switchNum < 10):
                 print ("!!! Invalid Input. Please Enter inputs in range [1-10]!!!")
-                continue                
+                continue
+            else:
+                break
         except ValueError:
             print ("!!! Invalid Input. Please Enter inputs in range [1-10]!!!")
             continue
