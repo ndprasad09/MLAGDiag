@@ -69,25 +69,26 @@ def MlagPort(handle, SwitchID):
         ISC_id = MLAGSQL.c.execute(
             "SELECT ISCID from MLAGPeer where SwitchID = '%s' and MLAGPeerName = '%s'" % (SwitchID, index3))
         ISCList = ISC_id.fetchall()
-        # REGEX the Port information output for obtaining the Vlan_Name, Vlan_Tag, Tagged|Untagged
-        Port_Vlan_info = re.findall('Name:.(.+?),.*Tag =.(.+?),.*\n\s+(Port.*:.*[0-9]*|(?!Port))', port_information)
-        if Port_Vlan_info:
-            # If Tag information (eg: Port specific tag) found then Tagging is 1 else Tagging is 0
-            for index in Port_Vlan_info:
-                index = list(index)
-                if "Port" in index[2]:
-                    index[2] = 1
-                else:
-                    index[2] = 0
-### AddPortInfo(SwitchID, ISC_id, Port_id, Mlag_id, VlanName, VlanTag, Tag|Untag)
-                MLAGSQL.AddPortInfo(SwitchID, ISCList[0][0], index1, index2, index[0], index[1], index[2])
-        else:
-            logging.error("Configuration Issue : No Vlan Information found for respective port %s" % (index1))
-            print ("\tFAIL: Configuration Issue : No Vlan Information found for respective port %s" % (index1))
-            Failure = Failure + 1
+        if ISCList:
+            # REGEX the Port information output for obtaining the Vlan_Name, Vlan_Tag, Tagged|Untagged
+            Port_Vlan_info = re.findall('Name:.(.+?),.*Tag =.(.+?),.*\n\s+(Port.*:.*[0-9]*|(?!Port))', port_information)
+            if Port_Vlan_info:
+                # If Tag information (eg: Port specific tag) found then Tagging is 1 else Tagging is 0
+                for index in Port_Vlan_info:
+                    index = list(index)
+                    if "Port" in index[2]:
+                        index[2] = 1
+                    else:
+                        index[2] = 0
+    ### AddPortInfo(SwitchID, ISC_id, Port_id, Mlag_id, VlanName, VlanTag, Tag|Untag)
+                    MLAGSQL.AddPortInfo(SwitchID, ISCList[0][0], index1, index2, index[0], index[1], index[2])
+            else:
+                logging.error("Configuration Issue : No Vlan Information found for respective port %s" % (index1))
+                print ("\tFAIL: Configuration Issue : No Vlan Information found for respective port %s" % (index1))
+                Failure = Failure + 1
 
    ### Union of the List MLAG Peer to obtain a List of distict MLAG Peers
-    mlag_peer = set(mlag_peer).union(mlag_peer)
+    mlag_peer = sorted(set(mlag_peer).union(mlag_peer))
 
 ### ISC Vlan Information Population
     for peer in mlag_peer:
