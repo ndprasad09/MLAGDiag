@@ -86,7 +86,7 @@ def ConnecttoSwitches():
         switchNum = raw_input("Please Enter Number of MLAG Switches to Debug: ")
         try:
             switchNum = int(switchNum)
-            if not (switchNum >1):
+            if not (switchNum >0):
                 print ("!!! Invalid Input. Input requires atleast 2!!!")
                 continue
             else:
