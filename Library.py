@@ -1,19 +1,50 @@
 import socket
 import re
 import os
+import sys
+import time
+
 def SendCmd (sHandler,command):
         """
         SendCmd procedure takes a cli command as input and execute
         it in the switch CLI and returns the output as string
         """
         returnstring = ""
+        Flag = 0
+        #time.sleep(1)
         try:
             if sHandler != 0:
                 sHandler.write (command +"\n")
-                returnstring = sHandler.read_until("#",timeout=5)
-                return returnstring
+                retStr = sHandler.read_until(command)
+
         except:
-            return returnstring
+            print ("ERROR: There seems to be connectivity issue. Please Retry !!!")
+            sys.exit()
+
+        else:
+            match = re.search(""+command+"",retStr)
+            if not match:
+                #print ("ERROR: Command %s not executed properly.There might be connection issue. Exiting the Script" %(command))
+                Flag = 1
+                #sys.exit()
+            else:
+                try:
+                    returnstring = sHandler.read_until("#",timeout=20)
+                except:
+                    print ("ERROR: There seems to be connectivity issue. Please Retry !!!")
+                    sys.exit()
+                if len(returnstring) != 0:
+                    return retStr + returnstring
+                else:
+                    Flag  = 1
+                #print ("ERROR: Command %s not executed" %(command))
+
+            if Flag:
+                print ("ERROR: Command %s not executed properly.There might be connection issue. Exiting the Script" %(command))
+                sys.exit()
+
+
+
 
 def split_before(pattern,text):
     """
