@@ -63,7 +63,10 @@ def Connect(host, username, password):
         print ("\nNo Connection to your Host: " + host + "\n")
         sys.exit()
     except socket.error:
-        print ("\n Connection attempt Failed. Please check your Connectivity")
+        print ("\nConnection attempt Failed. Please check your Connectivity")
+        sys.exit()
+    except EOFError:
+        print ("ERROR: Telnet Connection Closed")
         sys.exit()
 
 
@@ -83,13 +86,13 @@ def ConnecttoSwitches():
         switchNum = raw_input("Please Enter Number of MLAG Switches to Debug: ")
         try:
             switchNum = int(switchNum)
-            if not (switchNum >1 and switchNum < 10):
-                print ("!!! Invalid Input. Please Enter inputs in range [1-10]!!!")
+            if not (switchNum >1):
+                print ("!!! Invalid Input. Input requires atleast 2!!!")
                 continue
             else:
                 break
         except ValueError:
-            print ("!!! Invalid Input. Please Enter inputs in range [1-10]!!!")
+            print ("!!! Invalid Input.!!!")
             continue
     
         
@@ -146,6 +149,8 @@ def ConnecttoSwitches():
                 break
         SwitchID_handlerdict = dict(zip(switchIDList, connHandler))
         SwitchID_switchInfo = dict(zip(switchIDList,switchInfo))
+        #print "Execute Clear Session"
+        #time.sleep(10)
         GetSwitchInfo()
 
 
