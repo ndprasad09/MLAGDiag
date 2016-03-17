@@ -79,8 +79,18 @@ def ConnecttoSwitches():
     switchIDList = []
     switchIPList = []
     connHandler = []
-    switchNum = raw_input("Please Enter Number of MLAG Switches to Debug: ")
-    switchNum = int(switchNum)
+    while True:
+        switchNum = raw_input("Please Enter Number of MLAG Switches to Debug: ")
+        try:
+            switchNum = int(switchNum)
+            if not switchNum >1 and switchNum < 10:
+                print ("!!! Invalid Input. Please Enter inputs in range [1-10]!!!")
+                continue                
+        except ValueError:
+            print ("!!! Invalid Input. Please Enter inputs in range [1-10]!!!")
+            continue
+    
+        
     for eachSwitch in range(switchNum):
         Flag = 0
         tempSwitch = []
