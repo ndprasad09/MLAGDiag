@@ -16,6 +16,7 @@ def SendCmd (sHandler,command):
             if sHandler != 0:
                 sHandler.write (command +"\n")
                 retStr = sHandler.read_until(command)
+                #print retStr
 
         except:
             print ("ERROR: There seems to be connectivity issue. Please Retry !!!")
@@ -29,11 +30,16 @@ def SendCmd (sHandler,command):
                 #sys.exit()
             else:
                 try:
-                    returnstring = sHandler.read_until("#",timeout=20)
+                    returnstring = sHandler.read_until("#",timeout=100) #Timeout for Slow Connection
+                    match = re.search(r".*#",returnstring)
+                    if not match:
+                        print ("ERROR: There seems to be some connectivity issue. Please Retry !!!")
+                        sys.exit()
                 except:
                     print ("ERROR: There seems to be connectivity issue. Please Retry !!!")
                     sys.exit()
                 if len(returnstring) != 0:
+                    #print retStr+returnstring
                     return retStr + returnstring
                 else:
                     Flag  = 1
