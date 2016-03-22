@@ -72,7 +72,7 @@ def MlagPort(handle, SwitchID):
         ISCList = ISC_id.fetchall()
         if ISCList:
             # REGEX the Port information output for obtaining the Vlan_Name, Vlan_Tag, Tagged|Untagged
-            Port_Vlan_info = re.findall('Name:.(.+?),.*Tag =.(.+?),.*\n\s+(Port.*:.*[0-9]*|(?!Port))', port_information)
+            Port_Vlan_info = re.findall('Name:.(.+?),.*Tag =.([0-9]*).*,.*\n\s+(Port.*:.*[0-9]*|(?!Port))', port_information)
             if Port_Vlan_info:
                 # If Tag information (eg: Port specific tag) found then Tagging is 1 else Tagging is 0
                 for index in Port_Vlan_info:
@@ -108,7 +108,7 @@ def MlagPort(handle, SwitchID):
                 # Show Port information detail to obtain the ISC Vlan information details
                 ISC_Port_Vlan_output = Library.SendCmd(handle, "show ports %s information detail" % str(ISCport[0][0]))
                 # REGEX the Port information output for obtaining the Vlan_Name, Vlan_Tag, Tagged|Untagged
-                ISC_Port_Vlan_info = re.findall('Name:.(.+?),.*Tag =.(.+?),.*\n\s+(Port.*:.*[0-9]*|(?!Port))',
+                ISC_Port_Vlan_info = re.findall('Name:.(.+?),.*Tag =.([0-9]*).*,.*\n\s+(Port.*:.*[0-9]*|(?!Port))',
                                                 ISC_Port_Vlan_output)
                 if ISC_Port_Vlan_info:
                     for index in ISC_Port_Vlan_info:
