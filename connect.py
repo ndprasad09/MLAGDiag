@@ -206,3 +206,72 @@ def DisplaySwitchInfo(switchID):
     print ("\tSwitch Name:  "+str(SwitchID_switchInfo[switchID][2]))
     print ("\tSwitch IP:  "+str(SwitchID_switchInfo[switchID][0]))
     print ("\tSwitch MAC:  "+str(SwitchID_switchInfo[switchID][1]))
+
+
+def cliparser(switchNum,switchIpList):
+    global SwitchID_handlerdict
+    global SwitchID_switchInfo
+    switchIDList = []
+    switchInfo = []
+    connHandler = []
+    #parse_list = switchIpList.split(' ')
+    parse_list = switchIpList
+    try:
+	switchNum = int(switchNum)
+	if not (switchNum > 1):
+		print ("!!! Invalid Input. Input requires atleast 2!!!")
+		sys.exit()
+
+    except ValueError:
+	print ("!!! InValid Input !!!")
+	sys.exit() 
+	
+    if len(parse_list) == int(switchNum):
+        for i in range(0,len(parse_list)):
+                tempList = []
+                switchIDList.append(i)
+                tempList.append(i)
+                retList =  parse_list[i].rsplit('@',1)
+                if len(retList) == 1:
+                        print "ERROR: Please use the format user:pass@ipaddress"
+                        sys.exit()
+                else:
+                        IPAddress = retList[1]
+                try:
+                        socket.inet_aton(IPAddress)
+                except socket.error:
+                        print ("ERROR: IP Address {0} is Invalid. Please try again" .format(IPAddress))
+                        sys.exit()
+                tempList.append(IPAddress)
+                switchInfo.append(tempList)
+                retList2 = retList[0].split(':',1)
+                if len(retList2) == 1:
+                        UserName = retList2[0]
+                        Password = '\r'
+                        #print UserName
+                        #print Password
+                        retVal = Connect(IPAddress,UserName,Password)
+                        connHandler.append(retVal)
+                        Library.SendCmd(retVal, "disable clipaging")
+                        SwitchID_handlerdict = dict(zip(switchIDList, connHandler))
+                        SwitchID_switchInfo = dict(zip(switchIDList,switchInfo))
+                        GetSwitchInfo()
+
+                else:
+                        UserName = retList2[0]
+                        Password = retList2[1]
+                        #print UserName
+                        #print Password
+                        retVal = Connect(IPAddress,UserName,Password)
+                        connHandler.append(retVal)
+                        Library.SendCmd(retVal, "disable clipaging")
+                        SwitchID_handlerdict = dict(zip(switchIDList, connHandler))
+                        SwitchID_switchInfo = dict(zip(switchIDList,switchInfo))
+                        GetSwitchInfo()
+
+
+    else:
+        print ("ERROR: Number of Switches Does not match Number of Given Credentials")
+	sys.exit() 
+
+	
